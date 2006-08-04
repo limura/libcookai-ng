@@ -1,0 +1,29 @@
+; $Id$
+
+LIBRARY	libcookai-ng
+
+;DESCRIPTION "libcookai-ng: ZFM sample implementation"
+VERSION 0.0
+
+EXPORTS
+;	cookai_initialize	@1000
+;	cookai_join			@1100
+;	cookai_step_up		@1200
+;	cookai_update		@1300
+;	cookai_commit		@1400
+;	cookai_release		@1500
+;	cookai_step_down	@1600
+
+;	tick				@5000
+;	tick_read_fd		@5100
+;	tick_write_fd		@5200
+;	query				@5300
+;	delete_key			@5400
+;	get_peer_root		@5500
+;	set_printlevel		@5600
+;	id2str_r			@5700
+	
+	upnp_listen_stream	@9000
+	upnp_close			@9100
+	
+;	win32_threaded_cookai_initialize	@10000
