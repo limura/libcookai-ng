@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * $Id: id.c,v 1.3 2004/12/16 16:09:36 takuji-i Exp $
+ * $Id$
  */
 
 #include <sys/types.h>
