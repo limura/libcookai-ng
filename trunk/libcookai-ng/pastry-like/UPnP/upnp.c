@@ -98,6 +98,31 @@ void upnp_free(cookai_upnp *upnp){
 	free(upnp);
 }
 
+char *strstr_ci(char *buf, char *target){
+    char *pb, *pt, *ptmp;
+
+    if(buf == NULL || target == NULL || *target == '\0')
+	return NULL;
+
+    pb = buf;
+    while(*pb != '\0'){
+	if(*pb == *target){
+	    ptmp = pb;
+	    pt = target + 1;
+	    pb++;
+	    while(*pt != '\0' && *pb != '\0' && tolower(*pt) == tolower(*pb)){
+		pt++;
+		pb++;
+	    }
+	    if(*pt == '\0')
+		return ptmp;
+	}else{
+	    pb++;
+	}
+    }
+    return NULL;
+}
+
 /* IGD をみつける UDP bloadcast をして、その返事を malloc() した領域に入れて返す。free() はこれを呼んだ奴がやってね！ */
 char *upnp_discover(char *ST){
 	const char aPart[] = "M-SEARCH * HTTP/1.1\r\n"
@@ -134,8 +159,7 @@ char *upnp_discover(char *ST){
 	dest.sin_port = htons(1900);
 	dest.sin_family = AF_INET;
 
-	i = sizeof(dest);
-	if(sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)&dest, &i) < 0)
+	if(sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0)
 		return NULL;
 	{ /* なぜだかわからんが bloadcast address(またはIGDのIP addr) に投げてやらないと IGD が反応してくれないことがある。
 	     IGDのIPaddrを得るのは通常無理なので、とりあえず bloadcast address で我慢。
@@ -150,7 +174,7 @@ char *upnp_discover(char *ST){
 			dest.sin_addr.s_addr = ifr.ifr_broadaddr;
 #endif
 			setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
-			if(sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)&dest, i) < 0){
+			if(sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0){
 				closeSocket(sock);
 				return NULL;
 			}
@@ -172,7 +196,7 @@ char *upnp_discover(char *ST){
 		if((selectRet = select(fdSize, &rfds, NULL, NULL, &t)) > 0 && FD_ISSET(sock, &rfds) && 
 			(recvRet = recvfrom(sock, buf, sizeof(buf) - 1, 0, NULL, NULL)) > 0){
 				buf[recvRet] = '\0';
-				if(strstr(buf, ST) != NULL){
+				if(strstr_ci(buf, ST) != NULL){
 					char *retBuf;
 					closeSocket(sock);
 					retBuf = (char *)malloc(sizeof(char) * (strlen(buf) + 1));
@@ -325,7 +349,7 @@ char *getTag(char *tagName, char *targetBuffer, char *returnBuffer, size_t buffe
 	strcat(tagBuf, ">");
 
 
-	p = strstr(targetBuffer, tagBuf);
+	p = strstr_ci(targetBuffer, tagBuf);
 	if(p == NULL)
 		return NULL;
 	p += strlen(tagBuf);
@@ -334,7 +358,7 @@ char *getTag(char *tagName, char *targetBuffer, char *returnBuffer, size_t buffe
 	strcat(tagBuf, tagName);
 	strcat(tagBuf, ">");
 
-	p2 = strstr(p, tagBuf);
+	p2 = strstr_ci(p, tagBuf);
 	if(p2 == NULL)
 		return NULL;
 	if(p2 - p + 1 > bufferLength)
@@ -526,7 +550,7 @@ cookai_upnp *upnp_AddPortMapping(int targetPort, cookai_upnp *upnp){
 			closeSocket(sock);
 			return NULL;
 		}
-		if(strstr(ret, upnp->IGD_service_type) != NULL && strstr(ret, "200 OK\r\n") != NULL){
+		if(strstr_ci(ret, upnp->IGD_service_type) != NULL && strstr_ci(ret, "200 OK\r\n") != NULL){
 			upnp->wan_port = (char *)malloc(sizeof(char) * 10);
 			if(upnp->wan_port == NULL){
 				closeSocket(sock);
@@ -578,9 +602,9 @@ int upnp_DeletePortMapping(cookai_upnp *upnp){
 	ret = HTTP_post(upnp->IGD_control_url, sendBuf, strlen(sendBuf), headerBuf);
 	if(ret == NULL)
 		return -1;
-	if(strstr(ret, "DeletePortMappingResponse") != NULL
-		&& strstr(ret, upnp->IGD_service_type) != NULL
-		&& strstr(ret, "200 OK\r\n") != NULL)
+	if(strstr_ci(ret, "DeletePortMappingResponse") != NULL
+		&& strstr_ci(ret, upnp->IGD_service_type) != NULL
+		&& strstr_ci(ret, "200 OK\r\n") != NULL)
 		return 0;
 	return -1;
 }
@@ -610,13 +634,11 @@ cookai_upnp *upnp_listen_stream(int targetPort){
 			break;
 	if(ret == NULL)
 		return NULL;
-	if((p = strstr(ret, "\r\nLocation:")) == NULL)
-		if((p = strstr(ret, "\r\nLOCATION:")) == NULL)
-			if((p = strstr(ret, "\r\nlocation:")) == NULL){
-				upnp_free(upnp);
-				free(ret);
-				return NULL;
-			}
+	if((p = strstr_ci(ret, "\r\nLocation:")) == NULL){
+	    upnp_free(upnp);
+	    free(ret);
+	    return NULL;
+	}
 	if(p != NULL && strlen(p) < 13){
 		upnp_free(upnp);
 		free(ret);
@@ -651,7 +673,7 @@ cookai_upnp *upnp_listen_stream(int targetPort){
 		strcpy(serviceTypeBuf, "<serviceType>");
 		strcat(serviceTypeBuf, services[i]);
 		strcat(serviceTypeBuf, "</serviceType>");
-		p = strstr(ret, serviceTypeBuf);
+		p = strstr_ci(ret, serviceTypeBuf);
 		if(p != NULL)
 			break;
 	}
@@ -661,7 +683,7 @@ cookai_upnp *upnp_listen_stream(int targetPort){
 		return NULL;
 	}
 	upnp->IGD_service_type = services[i];
-	p2 = strstr(p, "</service>"); /* 拾い出したところから </service> までを読む */
+	p2 = strstr_ci(p, "</service>"); /* 拾い出したところから </service> までを読む */
 	if(p2 == NULL){
 		upnp_free(upnp);
 		free(ret);
