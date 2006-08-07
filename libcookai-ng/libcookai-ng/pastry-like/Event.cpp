@@ -26,80 +26,117 @@
  */
 
 #include "Event.h"
+#ifdef HAVE_WINDOWS_H
 #include <Windows.h>
+#endif /* HAVE_WINDOWS_H */
 
 EventQueue::EventQueue(void *userData){
-	data = userData;
-	handler = NULL;
+    data = userData;
+    handler = NULL;
 }
 
 EventQueue::EventQueue(void *userData, EventHandler Handler){
-	data = userData;
-	handler = Handler;
+    data = userData;
+    handler = Handler;
 }
 
 void *EventQueue::getData(){
-	return data;
+    return data;
 }
 
 EventHandler EventQueue::getHandler(){
-	return handler;
+    return handler;
 }
 
 void EventQueue::runHandler(){
-	if(handler != NULL)
-		handler(data);
+    if(handler != NULL)
+	handler(data);
 }
 
 
 EventManager::EventManager(){
-	thread_mutex_init(&queueListMutex, NULL);
-	//thread_mutex_init(&nextMutex, NULL);
+    thread_mutex_init(&queueListMutex, NULL);
+    thread_cond_init(&canReadCond);
+    thread_cond_init(&canNotWriteCond);
+    maxSize = 1024;
+}
+
+EventManager::EventManager(int queueSize){
+    thread_mutex_init(&queueListMutex, NULL);
+    thread_cond_init(&canReadCond);
+    thread_cond_init(&canNotWriteCond);
+    maxSize = queueSize;
 }
 
 EventManager::~EventManager(){
-	list<EventQueue *>::iterator it;
+    list<EventQueue *>::iterator it;
 
-	for(it = queue.begin(); it != queue.end(); it++){
-		delete *it;
-	}
+    thread_mutex_lock(&queueListMutex);
+    for(it = queue.begin(); it != queue.end(); it++){
+	delete *it;
+    }
+    thread_mutex_unlock(&queueListMutex);
+    thread_mutex_destroy(&queueListMutex);
+    thread_cond_destroy(&canReadCond);
+    thread_cond_destroy(&canNotWriteCond);
 }
 
 EventQueue *EventManager::pop(){
-	EventQueue *q;
+    EventQueue *q = NULL;
 
-	if(queue.empty())
-		return NULL;
-
-	thread_mutex_lock(queueListMutex);
+    thread_mutex_lock(&queueListMutex);
+    if(!queue.empty()){
 	q = queue.front();
 	queue.pop_front();
-	thread_mutex_unlock(queueListMutex);
-	//thread_mutex_unlock(nextMutex);
+	if(queue.empty())
+	    thread_cond_reset(&canReadCond);
+	thread_cond_signal(&canNotWriteCond);
+    }
+    thread_mutex_unlock(&queueListMutex);
+    return q;
+}
 
-	return q;
+EventQueue *EventManager::timedPop(int usec){
+    EventQueue *q = NULL;
+
+    thread_mutex_lock(&queueListMutex);
+    if(!queue.empty()){
+	q = queue.front();
+	queue.pop_front();
+    }else{
+	thread_cond_timedwait(&canReadCond, &queueListMutex, usec);
+	if(!queue.empty()){
+	    q = queue.front();
+	    queue.pop_front();
+	}
+    }
+    thread_mutex_unlock(&queueListMutex);
+    return q;
 }
 
 void EventManager::push(EventQueue *q){
-	if(q == NULL)
-		return;
-	thread_mutex_lock(queueListMutex);
-	queue.push_back(q);
-	thread_mutex_unlock(queueListMutex);
+    if(q == NULL)
+	return;
+    thread_mutex_lock(&queueListMutex);
+    queue.push_back(q);
+    thread_cond_signal(&canReadCond);
+    if(queue.size() > maxSize)
+	thread_cond_reset(&canNotWriteCond);
+    thread_mutex_unlock(&queueListMutex);
 }
 
 void EventManager::push(void *userData){
-	this->push(new EventQueue(userData));
+    this->push(new EventQueue(userData));
 }
 
 void EventManager::push(void *userData, EventHandler Handler){
-	this->push(new EventQueue(userData, Handler));
+    this->push(new EventQueue(userData, Handler));
 }
 
 void EventManager::next(){
-	EventQueue *q;
-	q = this->pop();
-	if(q != NULL)
-		q->runHandler();
-	delete q;
+    EventQueue *q;
+    q = this->pop();
+    if(q != NULL)
+	q->runHandler();
+    delete q;
 }
