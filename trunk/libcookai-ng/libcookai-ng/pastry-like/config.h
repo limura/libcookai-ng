@@ -213,9 +213,10 @@
 #define HAVE_IO_H
 #define HAVE_WSASTARTUP
 
-#undef USE_THREAD
+#define USE_THREAD
 #define HAVE_WINDOWS_H
 #define HAVE_WINSOCK2_H
+#define HAVE_PROCESS_H
 #undef HAVE_PTHREAD_H
 
 #define NSNS_NONBLOCK

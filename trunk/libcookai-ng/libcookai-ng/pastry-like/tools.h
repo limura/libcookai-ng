@@ -45,6 +45,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
@@ -113,3 +116,4 @@ unsigned char *vf_get_from_send_buf(unsigned char *buf, size_t bufsiz, char *fmt
 #endif /* __cplusplus */
 
 #endif /* _TOOLS_H */
+

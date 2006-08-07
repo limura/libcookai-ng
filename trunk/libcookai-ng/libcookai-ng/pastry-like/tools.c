@@ -411,7 +411,7 @@ char *realloc_push(char *buf_head, char **now, char *append, size_t size){
     size_t len;
 
     if(buf_head == NULL){
-	buf_head = malloc(size);
+	buf_head = (char *)malloc(size);
 	if(buf_head == NULL)
 	    fatal("%s(%d): no more memory! (size: %d)\n", __FILE__, __LINE__, size);
 	*now = buf_head;
@@ -421,7 +421,7 @@ char *realloc_push(char *buf_head, char **now, char *append, size_t size){
 	return buf_head;
     }
     len = *now - buf_head;
-    p = realloc(buf_head, *now - buf_head + size);
+    p = (char *)realloc(buf_head, *now - buf_head + size);
     if(p == NULL)
 	fatal("%s(%d): no more memory! (size: %d)\n", __FILE__, __LINE__, *now - buf_head + size);
     *now = p + len;
@@ -554,7 +554,7 @@ unsigned char *vf_create_send_buf(size_t *ret_siz, char *fmt, ...){
 
     flags = 0;
     va_start(ap, fmt);
-    p = fmt;
+    p = (unsigned char *)fmt;
     pp = buf;
     while(*p != '\0'){
 	switch(*p){
@@ -590,8 +590,8 @@ unsigned char *vf_create_send_buf(size_t *ret_siz, char *fmt, ...){
 	    pp += tmp_siz;
 	    break;
 	case 's': /* string */
-	    str = va_arg(ap, char *);
-	    tmp_siz = strlen(str);
+	    str = (unsigned char *)va_arg(ap, char *);
+	    tmp_siz = strlen((char *)str);
 	    siz += sizeof(uint32_t);
 	    CHECK_SIZE();
 	    ui32 = (uint32_t)htonl((u_long)tmp_siz);
@@ -648,7 +648,7 @@ unsigned char *vf_get_from_send_buf(unsigned char *buf, size_t bufsiz, char *fmt
 
     flags = 0;
     va_start(ap, fmt);
-    p = fmt;
+    p = (unsigned char *)fmt;
     pp = buf;
     while(*p != '\0'){
 	switch(*p){
@@ -739,3 +739,4 @@ unsigned long long bin2ull(unsigned char *buf, int depth){
     }
     return ull;
 }
+

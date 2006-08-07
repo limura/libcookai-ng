@@ -28,6 +28,11 @@
 #include "config.h"
 
 #include "thread.h"
+#include "tools.h"
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
@@ -35,6 +40,14 @@
 
 #ifdef HAVE_WINDOWS_H
 #include <windows.h>
+#endif
+
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+
+#ifdef HAVE_PROCESS_H
+#include <process.h>
 #endif
 
 #ifndef TRUE
@@ -45,47 +58,186 @@
 #endif
 
 #ifdef USE_THREAD
-int thread_mutex_init(thread_mutex *mutex, char *name){
-#ifdef HAVE_PTHREAD_H
-    if(pthread_mutex_init((pthread_mutex_t *)mutex, NULL) == 0)
-		return TRUE;
-#else defined(HAVE_WINDOWS_H)
-    *mutex = (thread_mutex)CreateMutex(NULL, FALSE, name);
-    if(*mutex != 0)
-		return TRUE;
-#endif
-    return FALSE;
-}
-#endif
 
-#ifdef USE_THREAD
-int thread_mutex_lock(thread_mutex *mutex){
+int thread_create(threadID *id, thread_func func, void *userdata){
 #ifdef HAVE_PTHREAD_H
-    DPRINTF(10, ("thread_mutex_lock(%p)\n", mutex));
-    if(pthread_mutex_lock((pthread_mutex_t *)mutex) == 0)
-		return TRUE;
-#else defined(HAVE_WINDOWS_H)
-    switch(WaitForSingleObject((HANDLE)*mutex, INFINITE)){
-	case WAIT_OBJECT_0:
-		return TRUE;
-	default:
-		break;
+    if(pthread_create((pthread_t *)id, NULL, (pthreadFunc)func, userdata) == 0)
+	return TRUE;
+#else defined(HAVE_PROCESS_H)
+    HANDLE h = (HANDLE)_beginthreadex(NULL, 0, (winThreadFunc)func, userdata, 0, NULL);
+    if(h != 0){
+	id = h;
+	return TRUE;
     }
 #endif
     return FALSE;
 }
-#endif
 
-#ifdef USE_THREAD
+int thraed_cancel(threadID id){
+#ifdef HAVE_PTHREAD_H
+    if(pthread_cancel((pthread_t)id) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    if(TerminateThread((HANDLE)id, 0) != 0)
+	return TRUE;
+#endif
+    return FALSE;
+}
+
+int thread_exit(){
+#ifdef HAVE_PTHREAD_H
+    pthread_exit(NULL);
+#else defined(HAVE_PROCESS_H)
+    _endthreadex(0);
+#endif
+    return FALSE;
+}
+
+int thread_mutex_init(thread_mutex *mutex, char *name){
+#ifdef HAVE_PTHREAD_H
+    if(pthread_mutex_init((pthread_mutex_t *)mutex, NULL) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    *mutex = (thread_mutex)CreateMutex(NULL, FALSE, (LPCWSTR)name);
+    if(*mutex != 0)
+	return TRUE;
+#endif
+    return FALSE;
+}
+
+int thread_mutex_lock(thread_mutex *mutex){
+#ifdef HAVE_PTHREAD_H
+    DPRINTF(10, ("thread_mutex_lock(%p)\n", mutex));
+    if(pthread_mutex_lock((pthread_mutex_t *)mutex) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    switch(WaitForSingleObject((HANDLE)*mutex, INFINITE)){
+	case WAIT_OBJECT_0:
+	    return TRUE;
+	default:
+	    break;
+    }
+#endif
+    return FALSE;
+}
+
 int thread_mutex_unlock(thread_mutex *mutex){
 #ifdef HAVE_PTHREAD_H
     DPRINTF(10, ("thread_mutex_unlock(%p)\n", mutex));
     if(pthread_mutex_unlock((pthread_mutex_t *)mutex) == 0)
-		return TRUE;
+	return TRUE;
 #else defined(HAVE_WINDOWS_H)
     if(ReleaseMutex((HANDLE)*mutex) != 0)
-		return TRUE;
+	return TRUE;
 #endif
     return FALSE;
 }
+
+int thread_mutex_destroy(thread_mutex *mutex){
+#ifdef HAVE_PTHREAD_H
+    if(pthread_mutex_destroy((pthread_mutex_t *)mutex) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    if(CloseHandle((HANDLE)mutex) != 0)
+	return TRUE;
 #endif
+    return FALSE;
+}
+
+int thread_cond_init(thread_cond *cond){
+#ifdef HAVE_PTHREAD_H
+    if(pthread_cond_init((pthread_cond_t *)cond, NULL) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    *cond = (thread_cond)CreateEvent(NULL, TRUE, TRUE, NULL);
+    if(*cond != 0)
+	return TRUE;
+#endif
+    return FALSE;
+}
+
+#ifdef HAVE_WINDOWS_H
+int thread_cond_reset(thread_cond *cond){
+    if(ResetEvent((HANDLE)*cond) == TRUE)
+	return TRUE;
+    return FALSE;
+}
+#endif /* HAVE_WINDOWS_H */
+
+int thread_cond_signal(thread_cond *cond){
+#ifdef HAVE_PTHREAD_H
+    if(pthread_cond_signal((pthread_cond_t *)cond) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    if(SetEvent((HANDLE)*cond) == TRUE)
+    	return TRUE;
+#endif
+    return FALSE;
+}
+
+int thread_cond_wait(thread_cond *cond, thread_mutex *mutex){
+#ifdef HAVE_PTHREAD_H
+    if(pthread_cond_wait((pthread_cond_t *)cond, (pthread_mutex_t *)mutex) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    thread_mutex_unlock(mutex);
+    switch(WaitForSingleObject((HANDLE)*cond, INFINITE)){
+	case WAIT_OBJECT_0:
+	    thread_mutex_lock(mutex);
+	    return TRUE;
+	default:
+	    thread_mutex_lock(mutex);
+	    return FALSE;
+    }
+#endif
+    return FALSE;
+}
+
+int thread_cond_timedwait(thread_cond *cond, thread_mutex *mutex, int usec){
+#ifdef HAVE_PTHREAD_H
+    struct timeval tv;
+    struct timespec ts;
+    long l;
+    if(usec <= 0)
+	return thread_cond_wait(cond, mutex);
+    if(gettimeofday(&tv, NULL) != 0)
+	return FALSE;
+    ts.tv_sec = tv.tv_sec;
+    l = tv.tv_usec + usec;
+    while(l >= 1000000){
+	ts.tv_sec++;
+	l -= 1000000;
+    }
+    ts.tv_nsec = l * 1000;
+    if(pthread_cond_timedwait((pthread_cond_t *)cond, (pthread_mutex_t *)mutex, &ts) == 0)
+	return TRUE;
+#else defined(HAVE_WINDOWS_H)
+    if(usec <= 0)
+	return thread_cond_wait(cond, mutex);
+    thread_mutex_unlock(mutex);
+    switch(WaitForSingleObject((HANDLE)*cond, usec / 1000)){
+	case WAIT_OBJECT_0:
+	    thread_mutex_lock(mutex);
+	    ReleaseMutex((HANDLE)*cond);
+	    return TRUE;
+	    break;
+	default:
+	    thread_mutex_lock(mutex);
+	    break;
+    }
+#endif
+    return FALSE;
+}
+
+int thread_cond_destroy(thread_cond *cond){
+#ifdef HAVE_PTHREAD_H
+    if(pthread_cond_destroy((pthread_cond_t *)cond) == 0)
+	return TRUE;
+#else defined(HAVE_PTHREAD_H)
+    if(CloseHandle((HANDLE)cond) != 0)
+	return TRUE;
+#endif
+    return FALSE;
+}
+
+#endif /* USE_THREAD */

@@ -52,16 +52,20 @@ public:
 class EventManager{
 private:
 	thread_mutex queueListMutex;
-	// thread_mutex nextMutex;
+	thread_cond canReadCond;
+	thread_cond canNotWriteCond;
 	list<EventQueue *> queue;
+	unsigned int maxSize;
 public:
 	EventManager();
+	EventManager(int queueSize);
 	~EventManager();
 
 	void push(EventQueue *queue);
 	void push(void *userData);
 	void push(void *userData, EventHandler Handler);
 	EventQueue *pop();
+	EventQueue *timedPop(int usec);
 	void next();
 };
 
