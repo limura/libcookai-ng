@@ -49,12 +49,14 @@ public:
 	void runHandler();
 };
 
+typedef list<EventQueue *> EventQueueList;
+
 class EventManager{
 private:
 	thread_mutex queueListMutex;
 	thread_cond canReadCond;
 	thread_cond canNotWriteCond;
-	list<EventQueue *> queue;
+	EventQueueList *queue;
 	unsigned int maxSize;
 public:
 	EventManager();
@@ -66,6 +68,7 @@ public:
 	void push(void *userData, EventHandler Handler);
 	EventQueue *pop();
 	EventQueue *timedPop(int usec);
+	EventQueueList *popAll();
 	void next();
 };
 

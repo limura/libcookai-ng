@@ -218,7 +218,7 @@ int thread_cond_timedwait(thread_cond *cond, thread_mutex *mutex, int usec){
     switch(WaitForSingleObject((HANDLE)*cond, usec / 1000)){
 	case WAIT_OBJECT_0:
 	    thread_mutex_lock(mutex);
-	    ReleaseMutex((HANDLE)*cond);
+	    ResetEvent((HANDLE)*cond);
 	    return TRUE;
 	    break;
 	default:
