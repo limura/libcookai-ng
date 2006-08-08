@@ -59,6 +59,7 @@ EventManager::EventManager(){
     thread_cond_init(&canReadCond);
     thread_cond_init(&canNotWriteCond);
     maxSize = 1024;
+    queue = new EventQueueList;
 }
 
 EventManager::EventManager(int queueSize){
@@ -66,13 +67,14 @@ EventManager::EventManager(int queueSize){
     thread_cond_init(&canReadCond);
     thread_cond_init(&canNotWriteCond);
     maxSize = queueSize;
+    queue = new EventQueueList;
 }
 
 EventManager::~EventManager(){
-    list<EventQueue *>::iterator it;
+    EventQueueList::iterator it;
 
     thread_mutex_lock(&queueListMutex);
-    for(it = queue.begin(); it != queue.end(); it++){
+    for(it = queue->begin(); it != queue->end(); it++){
 	delete *it;
     }
     thread_mutex_unlock(&queueListMutex);
@@ -85,10 +87,10 @@ EventQueue *EventManager::pop(){
     EventQueue *q = NULL;
 
     thread_mutex_lock(&queueListMutex);
-    if(!queue.empty()){
-	q = queue.front();
-	queue.pop_front();
-	if(queue.empty())
+    if(!queue->empty()){
+	q = queue->front();
+	queue->pop_front();
+	if(queue->empty())
 	    thread_cond_reset(&canReadCond);
 	thread_cond_signal(&canNotWriteCond);
     }
@@ -100,27 +102,38 @@ EventQueue *EventManager::timedPop(int usec){
     EventQueue *q = NULL;
 
     thread_mutex_lock(&queueListMutex);
-    if(!queue.empty()){
-	q = queue.front();
-	queue.pop_front();
+    if(!queue->empty()){
+	q = queue->front();
+	queue->pop_front();
     }else{
 	thread_cond_timedwait(&canReadCond, &queueListMutex, usec);
-	if(!queue.empty()){
-	    q = queue.front();
-	    queue.pop_front();
+	if(!queue->empty()){
+	    q = queue->front();
+	    queue->pop_front();
 	}
     }
     thread_mutex_unlock(&queueListMutex);
     return q;
 }
 
+EventQueueList *EventManager::popAll(){
+    EventQueueList *l = NULL;
+    thread_mutex_lock(&queueListMutex);
+    if(!queue->empty()){
+	l = queue;
+	queue = new EventQueueList;
+    }
+    thread_mutex_unlock(&queueListMutex);
+    return l;
+}
+
 void EventManager::push(EventQueue *q){
     if(q == NULL)
 	return;
     thread_mutex_lock(&queueListMutex);
-    queue.push_back(q);
+    queue->push_back(q);
     thread_cond_signal(&canReadCond);
-    if(queue.size() > maxSize)
+    if(queue->size() > maxSize)
 	thread_cond_reset(&canNotWriteCond);
     thread_mutex_unlock(&queueListMutex);
 }
