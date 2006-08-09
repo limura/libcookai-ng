@@ -29,19 +29,29 @@
 #define PASTRY_LIKE_KEY_H
 
 #include <string>
+#include <iostream>
 using namespace std;
 
 #include "id.h"
 
 class plKey{
 private:
-	plID *id;
+    plID *id;
+    string *keyStr;
 public:
-	plKey(string str);
-	plKey(char *str);
-	~plKey();
+    plKey();
+    plKey(char *str);
+    plKey(string str);
+    ~plKey();
 
-	plID *getID();
+    plID *getID();
+    string getKeyString();
+
+    void save(std::iostream& stream);
+    void load(std::iostream& stream);
+
+    bool operator==(plKey& obj);
+    bool operator!=(plKey& obj);
 };
 
 #endif /* PASTRY_LIKE_KEY_H */

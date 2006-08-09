@@ -25,24 +25,74 @@
  * $Id$
  */
 
+#include "config.h"
 #include "Key.h"
 
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+plKey::plKey(){
+    id = NULL;
+    keyStr = NULL;
+}
+
 plKey::plKey(char *str){
-	if(str == NULL){
-		id = NULL;
-		return;
-	}
-	id = new plID((unsigned char *)str, strlen(str));
+    if(str == NULL){
+	id = NULL;
+	return;
+    }
+    id = new plID(str);
+    keyStr = new string(str);
 }
 
 plKey::plKey(std::string str){
-	id = new plID((unsigned char *)str.c_str(), str.length());
+    id = new plID(&str);
+    keyStr = new string(str);
 }
 
 plKey::~plKey(){
+    if(id != NULL)
 	delete id;
+    if(keyStr != NULL)
+	delete keyStr;
 }
 
 plID *plKey::getID(){
-	return id;
+    return id;
+}
+
+bool plKey::operator==(plKey& obj){
+    if(obj.getID() == id)
+	return true;
+    return false;
+}
+
+bool plKey::operator!=(plKey& obj){
+    return !(obj == *this);
+}
+
+void plKey::save(iostream& stream){
+    size_t s;
+    s = htonl((long)keyStr->length());
+    stream.write((char *)&s, sizeof(s));
+    stream.write(keyStr->c_str(), (std::streamsize)keyStr->length());
+}
+
+void plKey::load(iostream& stream){
+    size_t s;
+    char *p;
+    stream.read((char *)&s, sizeof(s));
+    s = ntohl((long)s);
+    p = (char *)malloc(sizeof(char) * (s + 1));
+    if(p == NULL)
+	return;
+    stream.read(p, (std::streamsize)s);
+    p[s] = '\0';
+    keyStr = new string(p);
+    id = new plID(keyStr);
 }

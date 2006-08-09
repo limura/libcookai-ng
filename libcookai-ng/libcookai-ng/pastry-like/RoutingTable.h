@@ -33,46 +33,55 @@ using namespace std;
 
 #include "Data.h"
 #include "Peer.h"
+#include "thread.h"
 
 namespace RoutingTableElementType{
 typedef enum {
-	NEXT_HOP,
-	DATA,
-	UNKNOWN,
+    NEXT_HOP,
+    DATA,
+    UNKNOWN,
 } RoutingTableElementType;
 }
+typedef list<Peer *> PeerList;
+typedef list<plData *> plDataList;
 
 class RoutingTableElement{
-	RoutingTableElementType::RoutingTableElementType type;
-	list<Peer> peers;
-	list<plData> datas;
+    RoutingTableElementType::RoutingTableElementType type;
+    PeerList *peers;
+    plDataList *datas;
+    thread_mutex peerMutex;
+    thread_mutex dataMutex;
 public:
-	RoutingTableElementType::RoutingTableElementType getType();
-	list<Peer> getPeer();
-	list<plData> getData();
+    RoutingTableElementType::RoutingTableElementType getType();
+    PeerList *getPeerList();
+    plDataList *getDataList();
 
-	RoutingTableElement();
-	~RoutingTableElement();
+    RoutingTableElement();
+    ~RoutingTableElement();
 
-	void setPeer(Peer *peer);
-	void setData(plData *data);
-	void delData(plData *data);
+    plDataList *setPeer(Peer *peer);
+    PeerList *setData(plData *data);
+    void delData(plData *data);
+    void delPeer(Peer *peer);
 };
 
 #define RoutingTableSize (4) /* bit */
 
 class RoutingTable{
 private:
-	plID *id;
-	int routingTableSize;
-	RoutingTableElement **elem;
-	int getElementLength();
+    plID *id;
+    int routingTableSize;
+    RoutingTableElement **elem;
+    int getElementLength();
 public:
-	RoutingTable(int routingTableSize);
-	~RoutingTable();
+    RoutingTable(int routingTableSize);
+    ~RoutingTable();
 
-	void setID(plID *id);
-	RoutingTableElement *getElement(plID *id);
+    void setID(plID *id);
+    RoutingTableElement *getElement(plID *id);
+    RoutingTableElement *getElement(plKey *key);
+    plDataList *setPeer(Peer *peer);
+    PeerList *setData(plKey *key, plData *data);
 };
 
 #endif /* PASTRY_LIKE_ROUTING_TABLE_H */

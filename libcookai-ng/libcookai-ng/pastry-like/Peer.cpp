@@ -29,24 +29,44 @@
 #include "net.h"
 
 Peer::Peer(){
-	sock = -1;
-	id = NULL;
-	remote = service = NULL;
-	Enabled = false;
+    sock = -1;
+    id = NULL;
+    remote = service = NULL;
+    Enabled = false;
 }
 
 Peer::~Peer(){
-	if(remote != NULL)
-		delete remote;
-	if(service != NULL)
-		delete service;
-	Enabled = false;
+    if(remote != NULL)
+	delete remote;
+    if(service != NULL)
+	delete service;
+    Enabled = false;
+}
+
+bool Peer::enabled(){
+    return Enabled;
+}
+
+plID* Peer::getID(){
+    return id;
+}
+
+char *Peer::getIDStr(){
+    return id->getStr();
+}
+
+bool Peer::operator==(Peer& peer){
+    return *id == *peer.getID();
+}
+
+bool Peer::operator!=(Peer& peer){
+    return *id != *peer.getID();
 }
 
 void Peer::connect(char *Remote, char *Service){
-	remote = new string(Remote);
-	service = new string(Service);
+    remote = new string(Remote);
+    service = new string(Service);
 
-	sock = connect_stream(Remote, Service);
-	Enabled = true;
+    sock = connect_stream(Remote, Service);
+    Enabled = true;
 }

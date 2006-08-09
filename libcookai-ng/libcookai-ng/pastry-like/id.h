@@ -29,22 +29,29 @@
 #define NSNS_ID_H
 
 #include <string>
+#include <iostream>
 using namespace std;
 
 #define ID_LENGTH (20)
 
 class plID {
 private:
-	unsigned char id[ID_LENGTH];
-	char idStr[ID_LENGTH * 2 + 1];
+    unsigned char id[ID_LENGTH];
+    char idStr[ID_LENGTH * 2 + 1];
 public:
-	plID();
-	plID(char *key);
-	plID(string *key);
-	plID(unsigned char *data, size_t size);
-	unsigned char *getID();
-	char *getStr();
-	int getElem(int ElementSize, int pos);
+    plID();
+    plID(char *key);
+    plID(string *key);
+    plID(unsigned char *data, size_t size);
+    unsigned char *getID();
+    char *getStr();
+    int getElem(int ElementSize, int pos);
+
+    void save(iostream& stream);
+    void load(iostream& stream);
+
+    bool operator==(plID& obj);
+    bool operator!=(plID& obj);
 };
 
 #ifdef __cplusplus
