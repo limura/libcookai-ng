@@ -25,30 +25,81 @@
  * $Id$
  */
 
+#include "config.h"
+
 #include "Data.h"
 #include "Key.h"
 
+#include <iostream>
+
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 plData::plData(plKey *Key, unsigned char *Data, size_t Size){
-	key = Key;
-	data = Data;
-	size = Size;
+    key = Key;
+    data = Data;
+    size = Size;
 }
 
 plKey *plData::getKey(){
-	return key;
+    return key;
 }
 
 unsigned char *plData::getDataBuf(){
-	return data;
+    return data;
 }
 
 unsigned char *plData::getDataBuf(size_t *size_return){
-	if(size_return == NULL)
-		return NULL;
-	*size_return = size;
-	return data;
+    if(size_return == NULL)
+	return NULL;
+    *size_return = size;
+    return data;
 }
 
 size_t plData::getDataSize(){
-	return size;
+    return size;
 }
+
+bool plData::operator==(plData& obj){
+    plKey *k = obj.getKey();
+    if(k == NULL)
+	return false;
+    if(*k == *key && obj.getDataSize() == size){
+	unsigned char *p1 = data;
+	unsigned char *p2 = obj.getDataBuf();
+
+	for(unsigned int i = 0; i < size; i++){
+	    if(p1[i] != p2[i])
+		return false;
+	}
+	return true;
+    }
+    return false;
+}
+
+bool plData::operator!=(plData& obj){
+    return !(obj == *this);
+}
+
+void plData::save(iostream& stream){
+    size_t s = htonl((long)size);
+    key->save(stream);
+    stream.write((char *)&s, sizeof(s));
+    stream.write((char *)data, (std::streamsize)size);
+}
+
+void plData::load(iostream& stream){
+    size_t s;
+    key = new plKey();
+    key->load(stream);
+    stream.read((char *)&s, sizeof(s));
+    size = ntohl((long)s);
+    data = (unsigned char *)malloc(sizeof(char) * size);
+    stream.read((char *)data, (std::streamsize)size);
+}
+

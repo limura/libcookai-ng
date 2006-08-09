@@ -199,3 +199,30 @@ int plID::getElem(int ElementSize, int pos){
 	}
 	return -1;
 }
+
+bool plID::operator==(plID& obj){
+    unsigned char *p1, *p2;
+    p1 = (unsigned char *)id;
+    p2 = obj.getID();
+    if(p1 == NULL || p2 == NULL)
+	return false;
+
+    for(int i = 0; i < ID_LENGTH; i++){
+	if(p1[i] != p2[i])
+	    return false;
+    }
+    return true;
+}
+
+bool plID::operator!=(plID& obj){
+    return !(obj == *this);
+}
+
+void plID::save(iostream& stream){
+    stream.write((char *)id, ID_LENGTH);
+}
+
+void plID::load(iostream& stream){
+    stream.read((char *)id, ID_LENGTH);
+    id2str_r(id, idStr);
+}

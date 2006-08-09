@@ -41,6 +41,9 @@
 #include <sys/time.h>
 #endif
 #include <string.h>
+#ifdef _LIBCOOKAI_WINDOWS_
+#include <dprintf>
+#endif
 
 #include "config.h"
 #include "tools.h"

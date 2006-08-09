@@ -45,11 +45,14 @@ public:
 	~Peer();
 
 	bool enabled();
-	unsigned char *getID();
+	plID *getID();
 	char *getIDStr();
 
 	void sendQueue(MessageType type, size_t length, unsigned char *value);
 	void connect(char *remote, char *service);
+
+	bool operator==(Peer& peer);
+	bool operator!=(Peer& peer);
 };
 
 #endif /* NSNS_PEER_H */

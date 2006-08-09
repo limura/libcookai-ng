@@ -28,19 +28,29 @@
 #ifndef PASTRY_LIKE_DATA_H
 #define PASTRY_LIKE_DATA_H
 
+#include <iostream>
+
+#include "config.h"
+
 #include "id.h"
 #include "Key.h"
 
 class plData{
-	plKey *key;
-	unsigned char *data;
-	size_t size;
+    plKey *key;
+    unsigned char *data;
+    size_t size;
 public:
-	plData(plKey *key, unsigned char *data, size_t size);
-	plKey *getKey();
-	unsigned char *getDataBuf();
-	unsigned char *getDataBuf(size_t *size_return);
-	size_t getDataSize();
+    plData(plKey *key, unsigned char *data, size_t size);
+    plKey *getKey();
+    unsigned char *getDataBuf();
+    unsigned char *getDataBuf(size_t *size_return);
+    size_t getDataSize();
+
+    void save(iostream& stream);
+    void load(iostream& stream);
+
+    bool operator==(plData& obj);
+    bool operator!=(plData& obj);
 };
 
 #endif /* PASTRY_LIKE_DATA_H */
