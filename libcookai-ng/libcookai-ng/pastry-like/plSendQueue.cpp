@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 IIMURA Takuji. All rights reserved.
+ * Copyright (c) 2003, 2004 IIMURA Takuji. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -21,56 +21,42 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
- * $Id$
+ *
+ * $Id: $
  */
 
-#ifndef PASTRY_LIKE_EVENT_H
-#define PASTRY_LIKE_EVENT_H
+#include "plSendQueue.h"
 
-#include <list>
-using namespace std;
+plSendQueueData::plSendQueueData(plSendType::plSendType Type, plData *Data){
+    type = Type;
+    data = Data;
+}
 
-#include "thread.h"
+plSendQueue::plSendQueue(){
+    count = 0;
+    thread_mutex_init(&queueMutex, NULL);
+}
 
-typedef void (*EventHandler)(void *userData);
+plSendQueue::~plSendQueue(){
+    thread_mutex_destroy(&queueMutex);
+}
 
-class EventQueue{
-private:
-    void *data;
-    EventHandler handler;
-public:
-    EventQueue(void *userData);
-    EventQueue(void *userData, EventHandler Handler);
+void plSendQueue::enqueue(plSendType::plSendType type, plData *data){
+    if(data == NULL)
+	return;
+    thread_mutex_lock(&queueMutex);
+    count++;
+    
+    queueMapInt[count] = new plSendQueueData(type, data);
+    thread_mutex_unlock(&queueMutex);
+}
 
-    void *getData();
-    EventHandler getHandler();
+void plSendQueue::enqueue(plSendType::plSendType type, plKey *key, unsigned char *data, size_t size){
+    if(key == NULL || data == NULL || size <= 0)
+	return;
+    enqueue(type, new plData(key, data, size));
+}
 
-    void runHandler();
-};
+void plSendQueue::process(){
 
-typedef list<EventQueue *> EventQueueList;
-
-class EventManager{
-private:
-    thread_mutex queueListMutex;
-    thread_cond canReadCond;
-    thread_cond canNotWriteCond;
-    unsigned int maxSize;
-protected:
-    EventQueueList *queue;
-public:
-    EventManager();
-    EventManager(int queueSize);
-    ~EventManager();
-
-    void push(EventQueue *queue);
-    void push(void *userData);
-    void push(void *userData, EventHandler Handler);
-    EventQueue *pop();
-    EventQueue *timedPop(int usec);
-    EventQueueList *popAll();
-    void next();
-};
-
-#endif /* PASTRY_LIKE_EVENT_H */
+}

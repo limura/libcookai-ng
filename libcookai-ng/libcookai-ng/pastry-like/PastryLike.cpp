@@ -26,20 +26,124 @@
  */
 
 #include "PastryLike.h"
+#include "RoutingTable.h"
 
 #include "net.h"
 
 PastryLike::PastryLike(){
-	accept_socket = -1;
-	rt = NULL;
+    accept_socket = -1;
+    rt = NULL;
+    queryResponceEventFunc = NULL;
+    peerDeadEventFunc = NULL;
+    userEventFunc = NULL;
 }
 
 PastryLike::~PastryLike(){
-	if(accept_socket >= 0)
-		closeSocket(accept_socket);
+    if(accept_socket >= 0)
+	closeSocket(accept_socket);
 }
 
 int PastryLike::join(char *remote, char *service){
-	return -1;
+    return -1;
 }
 
+void PastryLike::set(plData *data){
+    RoutingTableElement *elem;
+    PeerList::iterator it = NULL;
+    PeerList *peerList = NULL;
+
+    if(data == NULL)
+	return;
+
+    elem = rt->getElement(data->getKey());
+    if(elem == NULL)
+	return;
+
+    switch(elem->getType()){
+	case RoutingTableElementType::UNKNOWN: // may be no data contained.
+	case RoutingTableElementType::DATA:
+	    elem->setData(data);
+	    break;
+	case RoutingTableElementType::PEER:
+	    sendQueue.enqueue(plSendType::SET, data);
+	    break;
+	default:
+	    break;
+    }
+}
+
+void PastryLike::set(plKey *key, unsigned char *data, size_t size){
+    if(key == NULL || data == NULL || size <= 0)
+	return;
+    set(new plData(key, data, size));
+}
+
+void PastryLike::set(char *key, unsigned char *data, size_t size){
+    if(key == NULL || data == NULL || size <= 0)
+	return;
+    set(new plData(new plKey(key), data, size));
+}
+
+void PastryLike::del(plData *data){
+    RoutingTableElement *elem;
+    PeerList::iterator it = NULL;
+    PeerList *peerList = NULL;
+
+    if(data == NULL)
+	return;
+
+    elem = rt->getElement(data->getKey());
+    if(elem == NULL)
+	return;
+
+    switch(elem->getType()){
+	case RoutingTableElementType::DATA:
+	    elem->delData(data);
+	    break;
+	case RoutingTableElementType::PEER:
+	    sendQueue.enqueue(plSendType::DEL, data);
+	    break;
+	default:
+	case RoutingTableElementType::UNKNOWN:
+	    break;
+    }
+}
+
+void PastryLike::query(plKey *key, void *userData){
+    RoutingTableElement *elem;
+    
+    if(key == NULL)
+	return;
+    elem = rt->getElement(key->getID());
+    if(elem == NULL)
+	return;
+    switch(elem->getType()){
+	case RoutingTableElementType::DATA:
+	    if(queryResponceEventFunc != NULL)
+		queryResponceEventFunc(elem->query(key), userData);
+	    break;
+	case RoutingTableElementType::PEER:
+	    break;
+	default:
+	case RoutingTableElementType::UNKNOWN:
+	    if(queryResponceEventFunc != NULL)
+		queryResponceEventFunc(NULL, userData);
+	    break;
+    }
+}
+
+void PastryLike::query(char *key, void *userData){
+    query(new plKey(key), userData);
+}
+
+void PastryLike::setQueryEventFunc(PastryLike::QueryResponceEventFunc func, void *userData){
+    queryResponceEventFunc = func;
+}
+
+void PastryLike::setPeerDeadEventFunc(PastryLike::PeerDeadEventFunc func){
+    peerDeadEventFunc = func;
+}
+
+void PastryLike::setUserEventFunc(PastryLike::UserEventFunc func){
+    userEventFunc = func;
+}

@@ -29,8 +29,6 @@
 #include "id.h"
 
 RoutingTableElement::RoutingTableElement(){
-    type = RoutingTableElementType::UNKNOWN;
-
     peers = NULL;
     datas = NULL;
 
@@ -92,7 +90,7 @@ PeerList *RoutingTableElement::setData(plData *data){
     thread_mutex_lock(&dataMutex);
     thread_mutex_lock(&peerMutex);
 
-    peerList = perrs;
+    peerList = peers;
     if(datas == NULL)
 	datas = new plDataList();
     datas->push_back(data);
@@ -109,7 +107,7 @@ plDataList *RoutingTableElement::setPeer(Peer *peer){
     plDataList *dataList = datas;
 
     thread_mutex_lock(&dataMutex);
-    thread_mutex_lock(&peerMutex):
+    thread_mutex_lock(&peerMutex);
 
     dataList = datas;
     if(peers == NULL)
@@ -132,8 +130,27 @@ PeerList *RoutingTableElement::getPeerList(){
     return peers;
 }
 
+plData *RoutingTableElement::query(plKey *key){
+    plDataList::iterator it;
+    if(datas == NULL)
+	return NULL;
+    thread_mutex_lock(&dataMutex);
+    for(it = datas->begin(); it != datas->end(); it++){
+	if(*((*it)->getKey()) == *key){
+	    thread_mutex_unlock(&dataMutex);
+	    return *it;
+	}
+    }
+    thread_mutex_unlock(&dataMutex);
+    return NULL;
+}
+
 RoutingTableElementType::RoutingTableElementType RoutingTableElement::getType(){
-    return type;
+    if(peers != NULL)
+	return RoutingTableElementType::PEER;
+    if(datas != NULL)
+	return RoutingTableElementType::DATA;
+    return RoutingTableElementType::UNKNOWN;
 }
 
 int RoutingTable::getElementLength(){
@@ -190,6 +207,7 @@ RoutingTableElement *RoutingTable::getElement(plKey *targetKey){
     return getElement(targetKey->getID());
 }
 
+#if 0
 plDataList *RoutingTable::setPeer(Peer *peer){
     RoutingTableElement *elem;
 
@@ -207,3 +225,28 @@ PeerList *RoutingTable::setData(plKey *key, plData *data){
 	return NULL;
     return elem->setData(data);
 }
+
+void RoutingTable::delPeer(Peer *peer){
+    RoutingTableElement *elem;
+    if(peer == NULL)
+	return;
+
+    elem = getElement(peer->getID());
+    if(elem == NULL)
+	return;
+
+    elem->delPeer(peer);
+}
+
+void RoutingTable::delData(plKey *key, plData *data){
+    RoutingTableElement *elem;
+    if(key == NULL || data == NULL)
+	return;
+
+    elem = getElement(key->getID());
+    if(elem == NULL)
+	return;
+
+    elem->delData(data);
+}
+#endif

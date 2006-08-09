@@ -159,6 +159,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\pastry-like\Distance.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\pastry-like\Event.cpp"
 					>
 				</File>
@@ -184,6 +188,10 @@
 				</File>
 				<File
 					RelativePath=".\pastry-like\Peer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\pastry-like\plSendQueue.cpp"
 					>
 				</File>
 				<File
@@ -273,6 +281,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\pastry-like\Distance.h"
+					>
+				</File>
+				<File
 					RelativePath=".\pastry-like\Event.h"
 					>
 				</File>
@@ -298,6 +310,10 @@
 				</File>
 				<File
 					RelativePath=".\pastry-like\Peer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\pastry-like\plSendQueue.h"
 					>
 				</File>
 				<File

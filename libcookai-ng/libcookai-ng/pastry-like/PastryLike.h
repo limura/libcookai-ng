@@ -33,24 +33,44 @@
 #include <string>
 #include <stdlib.h>
 
-#include "id.h"
+#include "plSendQueue.h"
+#include "Key.h"
 #include "RoutingTable.h"
+#include "Event.h"
 
-class DLL_EXPORT PastryLike {
+class PastryLike {
 private:
-	int accept_socket;
-	RoutingTable *rt;
+    int accept_socket;
+    RoutingTable *rt;
+    plSendQueue sendQueue;
+    EventManager eventManager;
 
 public:
-	PastryLike();
-	~PastryLike();
+    PastryLike();
+    ~PastryLike();
 
-	int join(char *remote, char *service);
-	void send(char *key, unsigned char *data, size_t size);
-	void send(plID *id, unsigned char *data, size_t size);
-	void del(char *key, unsigned char *data, size_t size);
-	void del(plID *id, unsigned char *data, size_t size);
-	void query(char *key, void *userData);
+    int join(char *remote, char *service);
+    void set(plData *data);
+    void set(char *key, unsigned char *data, size_t size);
+    void set(plKey *key, unsigned char *data, size_t size);
+    void del(plData *data);
+    void del(char *key, unsigned char *data, size_t size);
+    void del(plKey *key, unsigned char *data, size_t size);
+    void query(plKey *key, void *userData);
+    void query(char *key, void *userData);
+
+    bool processNextEvent();
+
+    typedef void (*QueryResponceEventFunc)(plData *data, void *userData);
+    void setQueryEventFunc(PastryLike::QueryResponceEventFunc func, void *userData);
+    typedef void (*PeerDeadEventFunc)(Peer *peer);
+    void setPeerDeadEventFunc(PastryLike::PeerDeadEventFunc func);
+    typedef void (*UserEventFunc)(Peer *peer, int type, size_t length, void *value);
+    void setUserEventFunc(PastryLike::UserEventFunc func);
+private:
+    PastryLike::QueryResponceEventFunc queryResponceEventFunc;
+    PastryLike::PeerDeadEventFunc peerDeadEventFunc;
+    PastryLike::UserEventFunc userEventFunc;
 };
 
 #endif /* NSNS_PASTRY_LIKE_NG_H */

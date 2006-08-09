@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 IIMURA Takuji. All rights reserved.
+ * Copyright (c) 2003, 2004 IIMURA Takuji. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -21,56 +21,38 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
- * $Id$
+ *
+ * $Id: $
  */
 
-#ifndef PASTRY_LIKE_EVENT_H
-#define PASTRY_LIKE_EVENT_H
+#include "Distance.h"
 
-#include <list>
-using namespace std;
+Distance::Distance(){
+    distance = -1;
+}
 
-#include "thread.h"
+Distance::Distance(int d){
+    distance = d;
+}
 
-typedef void (*EventHandler)(void *userData);
+Distance::~Distance(){
+}
 
-class EventQueue{
-private:
-    void *data;
-    EventHandler handler;
-public:
-    EventQueue(void *userData);
-    EventQueue(void *userData, EventHandler Handler);
-
-    void *getData();
-    EventHandler getHandler();
-
-    void runHandler();
-};
-
-typedef list<EventQueue *> EventQueueList;
-
-class EventManager{
-private:
-    thread_mutex queueListMutex;
-    thread_cond canReadCond;
-    thread_cond canNotWriteCond;
-    unsigned int maxSize;
-protected:
-    EventQueueList *queue;
-public:
-    EventManager();
-    EventManager(int queueSize);
-    ~EventManager();
-
-    void push(EventQueue *queue);
-    void push(void *userData);
-    void push(void *userData, EventHandler Handler);
-    EventQueue *pop();
-    EventQueue *timedPop(int usec);
-    EventQueueList *popAll();
-    void next();
-};
-
-#endif /* PASTRY_LIKE_EVENT_H */
+bool Distance::operator!=(Distance& obj){
+    return obj.distance != this->distance;
+}
+bool Distance::operator==(Distance& obj){
+    return obj.distance == this->distance;
+}
+bool Distance::operator<(Distance& obj){
+    return obj.distance < this->distance;
+}
+bool Distance::operator>(Distance& obj){
+    return obj.distance > this->distance;
+}
+bool Distance::operator>=(Distance& obj){
+    return obj.distance >= this->distance;
+}
+bool Distance::operator<=(Distance& obj){
+    return obj.distance <= this->distance;
+}

@@ -28,31 +28,41 @@
 #ifndef NSNS_PEER_H
 #define NSNS_PEER_H
 
+#include <string>
+#include <list>
+#include <map>
+using namespace std;
+
 #include "id.h"
 #include "Message.h"
-#include <string>
+#include "Distance.h"
 
 using namespace std;
 
 class Peer{
 private:
-	int sock;
-	plID *id;
-	string *remote, *service;
-	bool Enabled;
+    int sock;
+    plID *id;
+    string *remote, *service;
+    bool Enabled;
+    Distance *distance;
 public:
-	Peer();
-	~Peer();
+    Peer();
+    ~Peer();
 
-	bool enabled();
-	plID *getID();
-	char *getIDStr();
+    bool enabled();
+    plID *getID();
+    char *getIDStr();
 
-	void sendQueue(MessageType type, size_t length, unsigned char *value);
-	void connect(char *remote, char *service);
+    void sendQueue(MessageType type, size_t length, unsigned char *value);
+    void connect(char *remote, char *service);
+    Distance *getDistance();
 
-	bool operator==(Peer& peer);
-	bool operator!=(Peer& peer);
+    bool operator==(Peer& peer);
+    bool operator!=(Peer& peer);
 };
+
+typedef list<Peer *> PeerList;
+typedef map<int, Peer *> PeerMapInt;
 
 #endif /* NSNS_PEER_H */
