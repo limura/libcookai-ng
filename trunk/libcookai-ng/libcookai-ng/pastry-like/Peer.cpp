@@ -33,6 +33,7 @@ Peer::Peer(){
     id = NULL;
     remote = service = NULL;
     Enabled = false;
+    distance = NULL;
 }
 
 Peer::~Peer(){
@@ -69,4 +70,8 @@ void Peer::connect(char *Remote, char *Service){
 
     sock = connect_stream(Remote, Service);
     Enabled = true;
+}
+
+Distance *Peer::getDistance(){
+    return distance;
 }

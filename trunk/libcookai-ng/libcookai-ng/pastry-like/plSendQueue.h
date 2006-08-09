@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 IIMURA Takuji. All rights reserved.
+ * Copyright (c) 2003, 2004 IIMURA Takuji. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -21,69 +21,54 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
- * $Id$
+ *
+ * $Id: $
  */
 
-#ifndef PASTRY_LIKE_ROUTING_TABLE_H
-#define PASTRY_LIKE_ROUTING_TABLE_H
+#ifndef PL_SENDQUEUE_H
+#define PL_SENDQUEUE_H
 
-#include <list>
+#include <map>
 using namespace std;
 
+#include "Key.h"
 #include "Data.h"
-#include "Peer.h"
 #include "thread.h"
 
-namespace RoutingTableElementType{
+namespace plSendType{
     typedef enum {
-	PEER,
-	DATA,
-	UNKNOWN,
-    } RoutingTableElementType;
+	SET,
+	DEL,
+	QUERY,
+    } plSendType;
 }
 
-class RoutingTableElement{
-    PeerList *peers;
-    plDataList *datas;
-    thread_mutex peerMutex;
-    thread_mutex dataMutex;
-public:
-    RoutingTableElementType::RoutingTableElementType getType();
-    PeerList *getPeerList();
-    plDataList *getDataList();
-
-    RoutingTableElement();
-    ~RoutingTableElement();
-
-    plDataList *setPeer(Peer *peer);
-    PeerList *setData(plData *data);
-    void delData(plData *data);
-    void delPeer(Peer *peer);
-    plData *query(plKey *key);
-};
-
-#define RoutingTableSize (4) /* bit */
-
-class RoutingTable{
+class plSendQueueData{
 private:
-    plID *id;
-    int routingTableSize;
-    RoutingTableElement **elem;
-    int getElementLength();
+    plSendType::plSendType type;
+    plData *data;
 public:
-    RoutingTable(int routingTableSize);
-    ~RoutingTable();
-
-    void setID(plID *id);
-    RoutingTableElement *getElement(plID *id);
-    RoutingTableElement *getElement(plKey *key);
-    /*
-    plDataList *setPeer(Peer *peer);
-    PeerList *setData(plKey *key, plData *data);
-    void delPeer(Peer *peer);
-    void delData(plKey *key, plData *data);
-    */
+    plSendQueueData(plSendType::plSendType type, plData *data);
+    plSendType::plSendType getType();
+    plData *getData();
 };
 
-#endif /* PASTRY_LIKE_ROUTING_TABLE_H */
+typedef map<int, plSendQueueData *> plSendQueueDataMapInt;
+
+class plSendQueue{
+private:
+    int count;
+    plSendQueueDataMapInt queueMapInt;
+    thread_mutex queueMutex;
+public:
+    plSendQueue();
+    ~plSendQueue();
+
+    void enqueue(plSendType::plSendType type, plData *data);
+    void enqueue(plSendType::plSendType type, plKey *key, unsigned char *data, size_t size);
+    void process();
+
+    void dequeue(plData *data);
+};
+
+#endif /* PL_SENDQUEUE_H */

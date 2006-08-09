@@ -29,6 +29,9 @@
 #define PASTRY_LIKE_DATA_H
 
 #include <iostream>
+#include <list>
+#include <map>
+using namespace std;
 
 #include "config.h"
 
@@ -52,5 +55,8 @@ public:
     bool operator==(plData& obj);
     bool operator!=(plData& obj);
 };
+
+typedef list<plData *> plDataList;
+typedef map<int, plData *> plDataMapInt;
 
 #endif /* PASTRY_LIKE_DATA_H */
