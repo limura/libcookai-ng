@@ -31,7 +31,7 @@
 #include <list>
 using namespace std;
 
-#include "thread.h"
+#include "../tools/thread.h"
 
 typedef void (*EventHandler)(void *userData);
 

@@ -26,7 +26,7 @@
  */
 
 #include "Peer.h"
-#include "net.h"
+#include "../tools/net.h"
 
 Peer::Peer(){
     sock = -1;

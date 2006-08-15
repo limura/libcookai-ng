@@ -179,10 +179,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\pastry-like\net.c"
-					>
-				</File>
-				<File
 					RelativePath=".\pastry-like\PastryLike.cpp"
 					>
 				</File>
@@ -198,22 +194,6 @@
 					RelativePath=".\pastry-like\RoutingTable.cpp"
 					>
 				</File>
-				<File
-					RelativePath=".\pastry-like\thread.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pastry-like\tools.c"
-					>
-				</File>
-				<Filter
-					Name="UPnP"
-					>
-					<File
-						RelativePath=".\pastry-like\UPnP\upnp.c"
-						>
-					</File>
-				</Filter>
 				<Filter
 					Name="openssl"
 					>
@@ -247,6 +227,92 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Rendezvous"
+				>
+				<File
+					RelativePath=".\Rendezvous\Rendezevous.cpp"
+					>
+				</File>
+				<Filter
+					Name="UPnP"
+					>
+					<File
+						RelativePath=".\Rendezvous\UPnP\upnp.c"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="tools"
+				>
+				<File
+					RelativePath=".\tools\net.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\tools\thread.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\tools\tools.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="ヘッダー ファイル"
@@ -273,10 +339,6 @@
 				Name="pastry-like"
 				>
 				<File
-					RelativePath=".\pastry-like\config.h"
-					>
-				</File>
-				<File
 					RelativePath=".\pastry-like\Data.h"
 					>
 				</File>
@@ -301,10 +363,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\pastry-like\net.h"
-					>
-				</File>
-				<File
 					RelativePath=".\pastry-like\PastryLike.h"
 					>
 				</File>
@@ -320,14 +378,6 @@
 					RelativePath=".\pastry-like\RoutingTable.h"
 					>
 				</File>
-				<File
-					RelativePath=".\pastry-like\thread.h"
-					>
-				</File>
-				<File
-					RelativePath=".\pastry-like\tools.h"
-					>
-				</File>
 				<Filter
 					Name="openssl"
 					>
@@ -336,14 +386,38 @@
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="Rendezvous"
+				>
+				<File
+					RelativePath=".\Rendezvous\Rendezevous.h"
+					>
+				</File>
 				<Filter
 					Name="UPnP"
 					>
 					<File
-						RelativePath=".\pastry-like\UPnP\upnp.h"
+						RelativePath=".\Rendezvous\UPnP\upnp.h"
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="tools"
+				>
+				<File
+					RelativePath=".\tools\net.h"
+					>
+				</File>
+				<File
+					RelativePath=".\tools\thread.h"
+					>
+				</File>
+				<File
+					RelativePath=".\tools\tools.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

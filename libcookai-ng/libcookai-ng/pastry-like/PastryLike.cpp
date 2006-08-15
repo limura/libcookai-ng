@@ -28,7 +28,7 @@
 #include "PastryLike.h"
 #include "RoutingTable.h"
 
-#include "net.h"
+#include "../tools/net.h"
 
 PastryLike::PastryLike(){
     accept_socket = -1;

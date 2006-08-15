@@ -25,7 +25,7 @@
  * $Id$
  */
 
-#include "config.h"
+#include "../config.h"
 
 #include "Data.h"
 #include "Key.h"

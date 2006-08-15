@@ -25,10 +25,10 @@
  * $Id$
  */
 
-#ifndef NSNS_PASTRY_LIKE_NG_H
-#define NSNS_PASTRY_LIKE_NG_H
+#ifndef PASTRY_LIKE_NG_H
+#define PASTRY_LIKE_NG_H
 
-#include "config.h"
+#include "../config.h"
 
 #include <string>
 #include <stdlib.h>
@@ -73,4 +73,4 @@ private:
     PastryLike::UserEventFunc userEventFunc;
 };
 
-#endif /* NSNS_PASTRY_LIKE_NG_H */
+#endif /* PASTRY_LIKE_NG_H */

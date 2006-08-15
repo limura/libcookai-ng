@@ -22,11 +22,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: net.h 12 2006-08-07 09:50:27Z uirou.j $
  */
 
 #ifndef NET_H
 #define NET_H
+
+#include "../config.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

@@ -22,13 +22,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: tools.h 12 2006-08-07 09:50:27Z uirou.j $
  */
 
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
-#include "config.h"
+#include "../config.h"
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>

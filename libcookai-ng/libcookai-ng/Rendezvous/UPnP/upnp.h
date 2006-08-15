@@ -22,14 +22,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: upnp.h 11 2006-08-04 18:47:03Z uirou.j $
  */
 
 #ifndef LIBCOOKAI_UPNP_H
 #define LIBCOOKAI_UPNP_H
 
-#include "pastry-like/config.h"
-#include "pastry-like/net.h"
+#include "../../config.h"
+#include "../../tools/net.h"
 
 #ifdef __cplusplus
 extern "C" {
