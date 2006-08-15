@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: tools.c 15 2006-08-09 04:33:49Z uirou.j $
  */
 
 #include <stdio.h>
@@ -45,7 +45,7 @@
 #include <dprintf>
 #endif
 
-#include "config.h"
+#include "../config.h"
 #include "tools.h"
 
 #define HEXDUMP_WIDTH (16)

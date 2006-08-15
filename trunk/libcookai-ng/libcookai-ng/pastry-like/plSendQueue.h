@@ -33,7 +33,7 @@ using namespace std;
 
 #include "Key.h"
 #include "Data.h"
-#include "thread.h"
+#include "../tools/thread.h"
 
 namespace plSendType{
     typedef enum {

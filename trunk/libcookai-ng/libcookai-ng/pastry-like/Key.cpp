@@ -25,7 +25,7 @@
  * $Id$
  */
 
-#include "config.h"
+#include "../config.h"
 #include "Key.h"
 
 #ifdef HAVE_WINSOCK2_H

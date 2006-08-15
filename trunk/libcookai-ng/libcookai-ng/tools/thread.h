@@ -22,13 +22,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id$
+ * $Id: thread.h 12 2006-08-07 09:50:27Z uirou.j $
  */
 
 #ifndef PASTRY_LIKE_THREAD_H
 #define PASTRY_LOKE_THREAD_H
 
-#include "config.h"
+#include "../config.h"
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 #endif

@@ -33,7 +33,7 @@ using namespace std;
 
 #include "Data.h"
 #include "Peer.h"
-#include "thread.h"
+#include "../tools/thread.h"
 
 namespace RoutingTableElementType{
     typedef enum {

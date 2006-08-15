@@ -33,7 +33,7 @@
 #include <map>
 using namespace std;
 
-#include "config.h"
+#include "../config.h"
 
 #include "id.h"
 #include "Key.h"
