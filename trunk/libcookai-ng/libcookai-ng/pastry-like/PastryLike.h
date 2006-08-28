@@ -43,7 +43,7 @@ private:
     int accept_socket;
     RoutingTable *rt;
     plSendQueue sendQueue;
-    EventManager eventManager;
+    plEventManager eventManager;
 
 public:
     PastryLike();

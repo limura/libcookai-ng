@@ -33,43 +33,43 @@ using namespace std;
 
 #include "../tools/thread.h"
 
-typedef void (*EventHandler)(void *userData);
+typedef void (*plEventHandler)(void *userData);
 
-class EventQueue{
+class plEventQueue{
 private:
     void *data;
-    EventHandler handler;
+    plEventHandler handler;
 public:
-    EventQueue(void *userData);
-    EventQueue(void *userData, EventHandler Handler);
+    plEventQueue(void *userData);
+    plEventQueue(void *userData, plEventHandler Handler);
 
     void *getData();
-    EventHandler getHandler();
+    plEventHandler getHandler();
 
     void runHandler();
 };
 
-typedef list<EventQueue *> EventQueueList;
+typedef list<plEventQueue *> plEventQueueList;
 
-class EventManager{
+class plEventManager{
 private:
     thread_mutex queueListMutex;
     thread_cond canReadCond;
     thread_cond canNotWriteCond;
     unsigned int maxSize;
 protected:
-    EventQueueList *queue;
+    plEventQueueList *queue;
 public:
-    EventManager();
-    EventManager(int queueSize);
-    ~EventManager();
+    plEventManager();
+    plEventManager(int queueSize);
+    ~plEventManager();
 
-    void push(EventQueue *queue);
+    void push(plEventQueue *queue);
     void push(void *userData);
-    void push(void *userData, EventHandler Handler);
-    EventQueue *pop();
-    EventQueue *timedPop(int usec);
-    EventQueueList *popAll();
+    void push(void *userData, plEventHandler Handler);
+    plEventQueue *pop();
+    plEventQueue *timedPop(int usec);
+    plEventQueueList *popAll();
     void next();
 };
 

@@ -155,6 +155,10 @@
 				Name="pastry-like"
 				>
 				<File
+					RelativePath="..\..\..\..\..\Application Data\Microsoft\Internet Explorer\Quick Launch\Cygwin.lnk"
+					>
+				</File>
+				<File
 					RelativePath=".\pastry-like\Data.cpp"
 					>
 				</File>
@@ -319,6 +323,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\config.h"
+				>
+			</File>
 			<Filter
 				Name="libcookai"
 				>

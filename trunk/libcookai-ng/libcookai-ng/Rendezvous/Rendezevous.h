@@ -25,3 +25,16 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
+#include "../config.h"
+
+#include <string>
+using namespace std;
+
+class Rendezevous {
+private:
+public:
+    Rendezevous();
+    ~Rendezevous();
+
+    int search(char *group_name, char *remoteIP_return, char *port_return);
+};
