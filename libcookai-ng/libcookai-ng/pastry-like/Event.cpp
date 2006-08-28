@@ -30,48 +30,48 @@
 #include <Windows.h>
 #endif /* HAVE_WINDOWS_H */
 
-EventQueue::EventQueue(void *userData){
+plEventQueue::plEventQueue(void *userData){
     data = userData;
     handler = NULL;
 }
 
-EventQueue::EventQueue(void *userData, EventHandler Handler){
+plEventQueue::plEventQueue(void *userData, plEventHandler Handler){
     data = userData;
     handler = Handler;
 }
 
-void *EventQueue::getData(){
+void *plEventQueue::getData(){
     return data;
 }
 
-EventHandler EventQueue::getHandler(){
+plEventHandler plEventQueue::getHandler(){
     return handler;
 }
 
-void EventQueue::runHandler(){
+void plEventQueue::runHandler(){
     if(handler != NULL)
 	handler(data);
 }
 
 
-EventManager::EventManager(){
+plEventManager::plEventManager(){
     thread_mutex_init(&queueListMutex, NULL);
     thread_cond_init(&canReadCond);
     thread_cond_init(&canNotWriteCond);
     maxSize = 1024;
-    queue = new EventQueueList;
+    queue = new plEventQueueList;
 }
 
-EventManager::EventManager(int queueSize){
+plEventManager::plEventManager(int queueSize){
     thread_mutex_init(&queueListMutex, NULL);
     thread_cond_init(&canReadCond);
     thread_cond_init(&canNotWriteCond);
     maxSize = queueSize;
-    queue = new EventQueueList;
+    queue = new plEventQueueList;
 }
 
-EventManager::~EventManager(){
-    EventQueueList::iterator it;
+plEventManager::~plEventManager(){
+    plEventQueueList::iterator it;
 
     thread_mutex_lock(&queueListMutex);
     for(it = queue->begin(); it != queue->end(); it++){
@@ -83,8 +83,8 @@ EventManager::~EventManager(){
     thread_cond_destroy(&canNotWriteCond);
 }
 
-EventQueue *EventManager::pop(){
-    EventQueue *q = NULL;
+plEventQueue *plEventManager::pop(){
+    plEventQueue *q = NULL;
 
     thread_mutex_lock(&queueListMutex);
     if(!queue->empty()){
@@ -98,8 +98,8 @@ EventQueue *EventManager::pop(){
     return q;
 }
 
-EventQueue *EventManager::timedPop(int usec){
-    EventQueue *q = NULL;
+plEventQueue *plEventManager::timedPop(int usec){
+    plEventQueue *q = NULL;
 
     thread_mutex_lock(&queueListMutex);
     if(!queue->empty()){
@@ -116,18 +116,18 @@ EventQueue *EventManager::timedPop(int usec){
     return q;
 }
 
-EventQueueList *EventManager::popAll(){
-    EventQueueList *l = NULL;
+plEventQueueList *plEventManager::popAll(){
+    plEventQueueList *l = NULL;
     thread_mutex_lock(&queueListMutex);
     if(!queue->empty()){
 	l = queue;
-	queue = new EventQueueList;
+	queue = new plEventQueueList;
     }
     thread_mutex_unlock(&queueListMutex);
     return l;
 }
 
-void EventManager::push(EventQueue *q){
+void plEventManager::push(plEventQueue *q){
     if(q == NULL)
 	return;
     thread_mutex_lock(&queueListMutex);
@@ -138,16 +138,16 @@ void EventManager::push(EventQueue *q){
     thread_mutex_unlock(&queueListMutex);
 }
 
-void EventManager::push(void *userData){
-    this->push(new EventQueue(userData));
+void plEventManager::push(void *userData){
+    this->push(new plEventQueue(userData));
 }
 
-void EventManager::push(void *userData, EventHandler Handler){
-    this->push(new EventQueue(userData, Handler));
+void plEventManager::push(void *userData, plEventHandler Handler){
+    this->push(new plEventQueue(userData, Handler));
 }
 
-void EventManager::next(){
-    EventQueue *q;
+void plEventManager::next(){
+    plEventQueue *q;
     q = this->pop();
     if(q != NULL)
 	q->runHandler();
