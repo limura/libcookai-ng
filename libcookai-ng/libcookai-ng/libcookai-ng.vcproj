@@ -155,10 +155,6 @@
 				Name="pastry-like"
 				>
 				<File
-					RelativePath="..\..\..\..\..\Application Data\Microsoft\Internet Explorer\Quick Launch\Cygwin.lnk"
-					>
-				</File>
-				<File
 					RelativePath=".\pastry-like\Data.cpp"
 					>
 				</File>
