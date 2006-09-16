@@ -30,11 +30,21 @@
 #include <string>
 using namespace std;
 
+#include "thread.h"
+
 class Rendezevous {
 private:
-public:
+    static thread_mutex singletonMutex;
+    static Rendezevous *Instance = NULL;
+
+    list<char *> groupNames;
+    threadID reciverThreadID;
+    thread_mutex groupNameMutex;
+    void initialize();
     Rendezevous();
     ~Rendezevous();
 
+public:
+    static Rendezevous* getInstance();
     int search(char *group_name, char *remoteIP_return, char *port_return);
 };

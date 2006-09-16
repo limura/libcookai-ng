@@ -25,3 +25,44 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
+#include "Rendezevous.h"
+#include "net.h"
+
+void reciverThreadFunc(void *p){
+    Rendezevous *me = (Rendezevous*)p;
+
+    if(me == NULL)
+	return;
+    while(1){
+
+    }
+}
+
+void Rendezevous::initialize(){
+    thread_mutex_init(&groupNameMutex, NULL);
+    thread_create(&reciverThreadID, reciverThreadFunc, this);
+
+
+}
+
+Rendezevous::Rendezevous(){
+    initialize();
+}
+
+Rendezevous::~Rendezevous(){
+}
+
+static Rendezevous* Rendezevous::getInstance(){
+    if(Instance == NULL){
+	thread_mutex_lock(&singletonMutex);
+	if(Instance == NULL){
+	    Instance = new Rendezevous();
+	}
+	thread_mutex_unlock(&singletonMutex);
+    }
+    return Instance;
+}
+
+int Rendezevous::search(char *group_name, char *remoteIP_return, char *port_return){
+
+}
