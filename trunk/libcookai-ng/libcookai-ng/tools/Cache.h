@@ -25,26 +25,42 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
-#include "../config.h"
+#ifndef COOKAI_CACHE_H
+#define COOKAI_CACHE_H
 
-#include <string>
+#include "thread.h"
+
 using namespace std;
 
-#include "../tools/thread.h"
+namespace cookai {
+    class CacheData {
+    private:
+	bool onMemoryFlug;
+	void *data;
+	size_t dataSize;
+	string filePath;
+    public:
+	CacheData();
+	~CacheData();
+	void setData(void *data, size_t size);
+	void setData(void *data, size_t size, bool onMemory);
+	void clearData();
+	void *getData(size_t *size);
+    };
 
-class Rendezevous {
-private:
-    static thread_mutex singletonMutex;
-    static Rendezevous *Instance = NULL;
-
-    list<char *> groupNames;
-    threadID reciverThreadID;
-    thread_mutex groupNameMutex;
-    void initialize();
-    Rendezevous();
-    ~Rendezevous();
-
-public:
-    static Rendezevous* getInstance();
-    int search(char *group_name, char *remoteIP_return, char *port_return);
+    typedef map<CacheData *, string> CacheDataMap;
+    class Cache {
+    private:
+	threadID dataTracerThreadID;
+	CacheDataMap cacheDataMap;
+    public:
+	Cache();
+	~Cache();
+	void runDataTracer();
+	void *getCacheData(string key, size_t *size);
+	void setCacheData(string key, void *data, size_t siz);
+	void setCacheData(string key, void *data, size_t siz, bool onMemory);
+    };
 };
+
+#endif /* COOKAI_CACHE_H */

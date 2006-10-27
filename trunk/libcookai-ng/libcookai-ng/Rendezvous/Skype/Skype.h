@@ -25,26 +25,3 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
-#include "../config.h"
-
-#include <string>
-using namespace std;
-
-#include "../tools/thread.h"
-
-class Rendezevous {
-private:
-    static thread_mutex singletonMutex;
-    static Rendezevous *Instance = NULL;
-
-    list<char *> groupNames;
-    threadID reciverThreadID;
-    thread_mutex groupNameMutex;
-    void initialize();
-    Rendezevous();
-    ~Rendezevous();
-
-public:
-    static Rendezevous* getInstance();
-    int search(char *group_name, char *remoteIP_return, char *port_return);
-};

@@ -247,6 +247,10 @@
 				Name="tools"
 				>
 				<File
+					RelativePath=".\tools\Cache.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\tools\net.c"
 					>
 					<FileConfiguration
@@ -326,6 +330,10 @@
 			<Filter
 				Name="libcookai"
 				>
+				<File
+					RelativePath=".\cookai.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Win32"
@@ -410,6 +418,10 @@
 			<Filter
 				Name="tools"
 				>
+				<File
+					RelativePath=".\tools\Cache.h"
+					>
+				</File>
 				<File
 					RelativePath=".\tools\net.h"
 					>
