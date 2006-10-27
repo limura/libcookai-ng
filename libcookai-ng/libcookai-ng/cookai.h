@@ -25,26 +25,16 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
-#include "../config.h"
+#ifndef COOKAI_H
+#define COOKAI_H
 
-#include <string>
-using namespace std;
+namespace cookai {
+    class cookai{
+    private:
 
-#include "../tools/thread.h"
+    public:
 
-class Rendezevous {
-private:
-    static thread_mutex singletonMutex;
-    static Rendezevous *Instance = NULL;
-
-    list<char *> groupNames;
-    threadID reciverThreadID;
-    thread_mutex groupNameMutex;
-    void initialize();
-    Rendezevous();
-    ~Rendezevous();
-
-public:
-    static Rendezevous* getInstance();
-    int search(char *group_name, char *remoteIP_return, char *port_return);
+    };
 };
+
+#endif /* COOKAI_H */
