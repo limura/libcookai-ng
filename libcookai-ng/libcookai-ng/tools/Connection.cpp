@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 IIMURA Takuji. All rights reserved.
+ * Copyright (c) 2006-2007 IIMURA Takuji. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,26 +25,11 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
-#include "../config.h"
+#include "../tools/StaticBuffer.h"
 
-#include <string>
-#include <list>
-using namespace std;
+#include <stdlib.h>
+#include <string.h>
 
-#include "../tools/thread.h"
+namespace Cookai {
 
-class Rendezevous {
-private:
-    static thread_mutex singletonMutex;
-
-    list<char *> groupNames;
-    threadID reciverThreadID;
-    thread_mutex groupNameMutex;
-    void initialize();
-    Rendezevous();
-    ~Rendezevous();
-
-public:
-    static Rendezevous* getInstance();
-    int search(char *group_name, char *remoteIP_return, char *port_return);
 };

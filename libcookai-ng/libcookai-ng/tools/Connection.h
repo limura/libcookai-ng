@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 IIMURA Takuji. All rights reserved.
+ * Copyright (c) 2006-2007 IIMURA Takuji. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,26 +25,29 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
-#include "../config.h"
+#ifndef COOKAI_CONNECTION
+#define COOKAI_CONNECTION
 
-#include <string>
-#include <list>
-using namespace std;
+namespace Cookai {
 
-#include "../tools/thread.h"
+    typedef struct _ChunkData{
+	unsigned char nextChunkNum;
+	unsigned char channel;
+	uint16_t length;
+	unsigned char dataStartPoint;
+    } ChunkData;
 
-class Rendezevous {
-private:
-    static thread_mutex singletonMutex;
+    class Connection
+    {
+    private:
+	size_t size;
+	size_t now;
+	unsigned char *buf;
+    public:
+	Connection(void);
+	~Connection(void);
 
-    list<char *> groupNames;
-    threadID reciverThreadID;
-    thread_mutex groupNameMutex;
-    void initialize();
-    Rendezevous();
-    ~Rendezevous();
-
-public:
-    static Rendezevous* getInstance();
-    int search(char *group_name, char *remoteIP_return, char *port_return);
+    };
 };
+
+#endif /* COOKAI_STATIC_BUFFER */
