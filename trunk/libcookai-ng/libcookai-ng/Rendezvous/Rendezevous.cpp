@@ -26,23 +26,23 @@
  */
 
 #include "Rendezevous.h"
-#include "net.h"
+#include "../tools/net.h"
 
-void reciverThreadFunc(void *p){
+int reciverThreadFunc(void *p){
     Rendezevous *me = (Rendezevous*)p;
 
     if(me == NULL)
-	return;
+	return 0;
     while(1){
-
+	// XXX 
+	return 0;
     }
+    return 0;
 }
 
 void Rendezevous::initialize(){
     thread_mutex_init(&groupNameMutex, NULL);
-    thread_create(&reciverThreadID, reciverThreadFunc, this);
-
-
+    thread_create(&reciverThreadID, (thread_func)reciverThreadFunc, this);
 }
 
 Rendezevous::Rendezevous(){
@@ -52,7 +52,8 @@ Rendezevous::Rendezevous(){
 Rendezevous::~Rendezevous(){
 }
 
-static Rendezevous* Rendezevous::getInstance(){
+Rendezevous* Rendezevous::getInstance(){
+    static Rendezevous *Instance = NULL;
     if(Instance == NULL){
 	thread_mutex_lock(&singletonMutex);
 	if(Instance == NULL){
@@ -64,5 +65,6 @@ static Rendezevous* Rendezevous::getInstance(){
 }
 
 int Rendezevous::search(char *group_name, char *remoteIP_return, char *port_return){
-
+    // stub code.
+    return 0;
 }

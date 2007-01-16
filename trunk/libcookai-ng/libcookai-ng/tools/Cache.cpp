@@ -27,6 +27,8 @@
 
 #include "Cache.h"
 #include <stdio.h>
+#include <fcntl.h>
+#include <fstream>
 
 namespace cookai {
     CacheData::CacheData(){
@@ -38,24 +40,18 @@ namespace cookai {
     CacheData::~CacheData(){
     }
 
-    CacheData::setData(string key, void *dat, size_t size){
-	filePath = key;
-	data = dat;
-	dataSize = size;
-	onMemoryFlug = true;
-    }
-    CacheData::setData(string key, void *dat, size_t size, bool onMemory){
-	filePath = key;
+    void CacheData::setData(string key, void *dat, size_t size, bool onMemory){
+	filePath = new string(key);
 	onMemoryFlug = onMemory;
 	data = dat;
 	dataSize = size;
 	if(!onMemoryFlug){
-	    int fd = open(filePath.to_cstr(), O_RWR);
-	    write(fd, dat, size);
-	    close(fd);
+	    std::ofstream ofile(filePath->c_str());
+	    ofile.write((char *)dat, (std::streamsize)size);
+	    ofile.close();
 	}
     }
-    CacheData::clearData(){
+    void CacheData::clearData(){
 	if(filePath != NULL)
 	    delete filePath;
 
@@ -71,17 +67,15 @@ namespace cookai {
 	return data;
     }
 
-    typedef map<CacheData *, string> CacheDataMap;
-
     Cache::Cache(){
-	if(dataTracerThreadID
-
     }
     Cache::~Cache(){
     }
 
-    Cache::runDataTracer(){
+    void Cache::runDataTracer(){
     }
+//    typedef map<CacheData *, string> CacheDataMap;
+
     void *Cache::getCacheData(string key, size_t *size){
 	CacheData *cd = cacheDataMap[key];
 	if(cd == NULL){
@@ -106,6 +100,6 @@ namespace cookai {
 	    if(cd == NULL) // XXX fatal.
 		return;
 	}
-	cd->setData(data, siz, onMemory);
+	cd->setData(key, data, siz, onMemory);
     }
 };

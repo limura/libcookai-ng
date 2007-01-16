@@ -251,6 +251,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\tools\ChunkedConnection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\tools\Connection.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\tools\net.c"
 					>
 					<FileConfiguration
@@ -271,6 +279,10 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\tools\StaticBuffer.cpp"
+					>
 				</File>
 				<File
 					RelativePath=".\tools\thread.c"
@@ -423,7 +435,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\tools\ChunkedConnection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\tools\Connection.h"
+					>
+				</File>
+				<File
 					RelativePath=".\tools\net.h"
+					>
+				</File>
+				<File
+					RelativePath=".\tools\StaticBuffer.h"
 					>
 				</File>
 				<File

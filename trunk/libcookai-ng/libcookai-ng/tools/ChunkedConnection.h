@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 IIMURA Takuji. All rights reserved.
+ * Copyright (c) 2006-2007 IIMURA Takuji. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,43 +25,54 @@
  * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
-#ifndef COOKAI_CACHE_H
-#define COOKAI_CACHE_H
+#ifndef COOKAI_CHUNKED_CONNECTION
+#define COOKAI_CHUNKED_CONNECTION
 
-#include <string>
-#include <map>
-using namespace std;
+#include <list>
 
+#include "../config.h"
 #include "thread.h"
+#include "StaticBuffer.h"
+#include "Connection.h"
 
-namespace cookai {
-    class CacheData {
-    private:
-	bool onMemoryFlug;
-	void *data;
-	size_t dataSize;
-	string *filePath;
+namespace Cookai {
+
+#define CHUNKED_CONNECTION_MAX_CHANNEL (256)
+
+    typedef bool (*chunkReadHandler)(unsigned char *buf, size_t length, int channel);
+
+    class ChunkedConnection{
     public:
-	CacheData();
-	~CacheData();
-	void setData(string key, void *data, size_t size, bool onMemory = true);
-	void clearData();
-	void *getData(size_t *size);
+	typedef enum {
+	    THREADED,
+	    NON_BLOCKING_IO,
+	} AccessType;
+
+    private:
+	AccessType type;
+	bool threadEnable;
+	threadID readThreadID;
+	chunkReadHandler blockReadHandler;
+	chunkReadHandler streamReadHandler;
+	std::list<Connection *> connectionList;
+
+    public:
+	ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::AccessType type);
+	~ChunkedConnection(void);
+
+	bool BlockWrite(unsigned char *buf, size_t length, int channel = 0);
+	bool BlockCommit(int channel = 0);
+	bool StreamWrite(unsigned char *buf, size_t length, int channel = 0);
+
+	bool RunThread();
+	unsigned char *BlockRead(size_t *length, int channel = 0);
+	unsigned char *StreamRead(size_t *length, int channel = 0);
+
+	bool RunRead();
+	void SetBlockReadHandler(chunkReadHandler handler, int channel = 0);
+	void SetStreamReadHandler(chunkReadHandler handler, int channel = 0);
     };
 
-    typedef map<string, CacheData *> CacheDataMap;
-    class Cache {
-    private:
-	threadID dataTracerThreadID;
-	CacheDataMap cacheDataMap;
-    public:
-	Cache();
-	~Cache();
-	void runDataTracer();
-	void *getCacheData(string key, size_t *size);
-	void setCacheData(string key, void *data, size_t siz);
-	void setCacheData(string key, void *data, size_t siz, bool onMemory);
-    };
-};
+}; /* namespace Cookai */
 
-#endif /* COOKAI_CACHE_H */
+#endif /* COOKAI_CHUNKED_CONNECTION */
