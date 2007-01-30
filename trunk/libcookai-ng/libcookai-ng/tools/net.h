@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: net.h 12 2006-08-07 09:50:27Z uirou.j $
+ * $Id$
  */
 
 #ifndef NET_H
