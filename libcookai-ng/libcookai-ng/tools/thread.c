@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: thread.c 14 2006-08-08 11:47:12Z uirou.j $
+ * $Id$
  */
 
 #include "../config.h"
