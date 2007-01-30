@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: tools.c 15 2006-08-09 04:33:49Z uirou.j $
+ * $Id$
  */
 
 #include <stdio.h>

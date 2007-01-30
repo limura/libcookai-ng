@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: upnp.c 11 2006-08-04 18:47:03Z uirou.j $
+ * $Id$
  */
 
 /*
