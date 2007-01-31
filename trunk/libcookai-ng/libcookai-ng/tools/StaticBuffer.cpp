@@ -39,7 +39,7 @@
 #ifdef HAVE_WINDOWS_H
 #include <windows.h>
 #endif
-#ifdef HAVE__H
+#ifdef HAVE_IO_H
 #include <io.h>
 #endif
 
@@ -92,7 +92,11 @@ bool StaticBuffer::readFromFD(int fd, size_t dataSize){
 
 	return false;
     }
+#ifdef HAVE__READ
+    int length = _read(fd, &buf[now], dataSize);
+#else
     int length = read(fd, &buf[now], dataSize);
+#endif
     if(length == 0){ // EOF
     }else if(length < 0){ // error
     }

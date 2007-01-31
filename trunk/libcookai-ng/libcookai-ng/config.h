@@ -59,6 +59,7 @@
 #define HAVE_FCNTL
 #define HAVE_BZERO
 #undef HAVE_IO_H
+#undef HAVE__READ
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -98,6 +99,7 @@
 #define HAVE_FCNTL
 #define HAVE_BZERO
 #undef HAVE_IO_H
+#undef HAVE__READ
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -134,6 +136,7 @@
 #define HAVE_FCNTL
 #define HAVE_BZERO
 #undef HAVE_IO_H
+#undef HAVE__READ
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -171,6 +174,7 @@
 #define HAVE_FCNTL
 #define HAVE_BZERO
 #undef HAVE_IO_H
+#undef HAVE__READ
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -212,6 +216,7 @@
 #undef HAVE_BZERO
 #define HAVE_IO_H
 #define HAVE_WSASTARTUP
+#define HAVE__READ
 
 #define USE_THREAD
 #define HAVE_WINDOWS_H
