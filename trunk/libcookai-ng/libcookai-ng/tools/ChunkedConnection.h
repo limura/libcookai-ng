@@ -28,6 +28,7 @@
 #ifndef COOKAI_CHUNKED_CONNECTION
 #define COOKAI_CHUNKED_CONNECTION
 
+#include <string>
 #include <list>
 
 #include "../config.h"
@@ -47,7 +48,6 @@ namespace Cookai {
 	    THREADED,
 	    NON_BLOCKING_IO,
 	} AccessType;
-
     private:
 	AccessType type;
 	bool threadEnable;
@@ -58,6 +58,7 @@ namespace Cookai {
 
     public:
 	ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::AccessType type);
+	ChunkedConnection(std::string name, std::string service, Cookai::ChunkedConnection::AccessType type);
 	~ChunkedConnection(void);
 
 	bool BlockWrite(unsigned char *buf, size_t length, int channel = 0);

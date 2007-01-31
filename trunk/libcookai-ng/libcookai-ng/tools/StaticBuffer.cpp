@@ -25,45 +25,79 @@
  * $Id$
  */
 
-#include "../tools/StaticBuffer.h"
+#include "../config.h"
+
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+#ifdef HAVE__H
+#include <io.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>
+
+#include "../tools/StaticBuffer.h"
 
 namespace Cookai {
 
 StaticBuffer::StaticBuffer(size_t bufsize)
 {
-	size = bufsize;
-	buf = NULL;
-	if(size > 0)
-		buf = (unsigned char *)malloc(size);
+    size = bufsize;
+    buf = NULL;
+    if(size > 0)
+	buf = (unsigned char *)malloc(size);
 
-	now = 0;
+    now = 0;
 }
 
 StaticBuffer::~StaticBuffer(void)
 {
-	if(buf != NULL)
-		free(buf);
+    if(buf != NULL)
+	free(buf);
 }
 
 unsigned char *StaticBuffer::getBuffer(void){
-	return buf;
+    return buf;
 }
 size_t StaticBuffer::getDataLength(void){
-	return now;
+    return now;
 }
 size_t StaticBuffer::getBufferSize(void){
-	return size;
+    return size;
 }
-bool StaticBuffer::write(unsigned char *buf, size_t datasize){
-	if(datasize > size - now)
-		return false;
+bool StaticBuffer::write(unsigned char *buf, size_t dataSize){
+    if(dataSize > size - now)
+	return false;
 
-	memcpy(&buf[now], buf, datasize);
-	now += datasize;
-	return true;
+    memcpy(&buf[now], buf, dataSize);
+    now += dataSize;
+    return true;
+}
+
+bool StaticBuffer::readFromFD(int fd, size_t dataSize){
+    if(fd < 0)
+	return false;
+    if(dataSize + now > size){
+	/* skip */
+
+	return false;
+    }
+    int length = read(fd, &buf[now], dataSize);
+    if(length == 0){ // EOF
+    }else if(length < 0){ // error
+    }
+
+    return true;
 }
 
 };

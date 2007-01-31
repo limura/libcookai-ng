@@ -28,25 +28,50 @@
 #ifndef COOKAI_CONNECTION
 #define COOKAI_CONNECTION
 
+#include <string>
+
+#include "../config.h"
+#include "StaticBuffer.h"
+
 namespace Cookai {
 
+    typedef bool (*chunkReadHandler)(unsigned char *buf, size_t length, int channel);
     typedef struct _ChunkData{
+	uint16_t length;
 	unsigned char nextChunkNum;
 	unsigned char channel;
-	uint16_t length;
 	unsigned char dataStartPoint;
     } ChunkData;
 
     class Connection
     {
     private:
-	size_t size;
-	size_t now;
-	unsigned char *buf;
+	int fd;
+	size_t chunkSize;
+	char *remoteName, *remoteService;
+	StaticBuffer *readBuffer, *writeBuffer;
+#define COOKAI_CONNECTION_MAX_CHANNEL (256)
+	chunkReadHandler blockReadHandler[COOKAI_CONNECTION_MAX_CHANNEL];
+	chunkReadHandler streamReadHandler[COOKAI_CONNECTION_MAX_CHANNEL];
+
+	bool LookupIPPort(char *name, char *service, char **newName, char **newService);
+	bool Initialize(char *name, char *service, size_t newChunkSize);
+	bool Handshake(void);
+	bool Read();
+
     public:
-	Connection(void);
+	Connection(char *name, char *service, size_t chunkSize = 1414);
+	Connection(std::string name, std::string service, size_t chunkSize = 1414);
 	~Connection(void);
 
+	bool Connect(void);
+	bool IsConnect(void);
+	void Disconnect(void);
+
+
+
+	size_t NonBlockWrite(unsigned char *buf, size_t length);
+	StaticBuffer *NonBlockRead(int *channel, bool *isStream);
     };
 };
 

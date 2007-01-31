@@ -44,6 +44,7 @@ namespace Cookai {
 	size_t getDataLength(void);
 	size_t getBufferSize(void);
 	bool write(unsigned char *buf, size_t size);
+	bool readFromFD(int fd, size_t size);
     };
 };
 
