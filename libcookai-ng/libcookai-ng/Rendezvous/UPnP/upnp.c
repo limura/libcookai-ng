@@ -150,7 +150,7 @@ char *upnp_discover(char *ST){
 	strcat(buf, bPart);
 
 	sock = -1;
-	sock = socket(PF_INET, SOCK_DGRAM, 0);
+	sock = (int)socket(PF_INET, SOCK_DGRAM, 0);
 	if(sock < 0)
 		return NULL;
 

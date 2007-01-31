@@ -76,7 +76,7 @@ void windprintf(char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
     _vsnprintf(buf, sizeof(buf) -1, fmt, ap);
-    OutputDebugString(buf);
+    OutputDebugString((char *)buf);
     va_end(ap);
 }
 #endif /* _LIBCOOKAI_WINDOWS_ */
