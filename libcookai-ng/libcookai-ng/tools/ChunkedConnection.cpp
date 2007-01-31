@@ -31,6 +31,7 @@ namespace Cookai {
 
 	ChunkedConnection::ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::AccessType type)
 	{
+
 	}
 
 	ChunkedConnection::~ChunkedConnection(void)
