@@ -216,7 +216,8 @@
 #undef HAVE_BZERO
 #define HAVE_IO_H
 #define HAVE_WSASTARTUP
-#define HAVE__READ
+#define HAVE_mciSendStringW
+#define HAVE_MMSYSTEM_H
 
 #define USE_THREAD
 #define HAVE_WINDOWS_H
