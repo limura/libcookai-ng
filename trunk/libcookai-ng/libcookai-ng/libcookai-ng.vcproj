@@ -255,14 +255,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\tools\ChunkedConnection.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tools\Connection.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\tools\net.c"
 					>
 					<FileConfiguration
@@ -283,14 +275,6 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\tools\NonBlockConnect.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tools\StaticBuffer.cpp"
-					>
 				</File>
 				<File
 					RelativePath=".\tools\thread.c"
@@ -335,6 +319,52 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+				</File>
+			</Filter>
+			<Filter
+				Name="ChunkedConnection"
+				>
+				<File
+					RelativePath=".\ChunkedConnection\ChunkedConnection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\Connection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\Event.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\EventPool.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\NonBlockConnect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\StaticBuffer.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
@@ -447,23 +477,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\tools\ChunkedConnection.h"
-					>
-				</File>
-				<File
-					RelativePath=".\tools\Connection.h"
-					>
-				</File>
-				<File
 					RelativePath=".\tools\net.h"
-					>
-				</File>
-				<File
-					RelativePath=".\tools\NonBlockConnect.h"
-					>
-				</File>
-				<File
-					RelativePath=".\tools\StaticBuffer.h"
 					>
 				</File>
 				<File
@@ -472,6 +486,34 @@
 				</File>
 				<File
 					RelativePath=".\tools\tools.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ChunkedConnection"
+				>
+				<File
+					RelativePath=".\ChunkedConnection\ChunkedConnection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\Connection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\Event.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\EventPool.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\NonBlockConnect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\StaticBuffer.h"
 					>
 				</File>
 			</Filter>

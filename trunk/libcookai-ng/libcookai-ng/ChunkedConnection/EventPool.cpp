@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2007 IIMURA Takuji. All rights reserved.
+ * Copyright (c) 2006 IIMURA Takuji. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,20 +22,56 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * $Id$
+ * $Id: Peer.h 16 2006-08-09 07:40:49Z uirou.j $
  */
 
-#include "../tools/ChunkedConnection.h"
+#include "EventPool.h"
 
 namespace Cookai {
+namespace ChunkedConnection {
+    EventPool::EventPool(void){
+	thread_mutex_init(&eventListMutex, NULL);
+	eventList.clear();
+    }
 
-	ChunkedConnection::ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::AccessType type)
-	{
+    EventPool::~EventPool(void){
+	thread_mutex_destroy(&eventListMutex);
+    }
 
+    bool EventPool::Push(Cookai::ChunkedConnection::Event *newEvent){
+	thread_mutex_lock(&eventListMutex);
+	eventList.push_back(newEvent);
+	thread_mutex_unlock(&eventListMutex);
+	return true;
+    }
+
+    Cookai::ChunkedConnection::Event *EventPool::Pop(void){
+	if(eventList.empty())
+	    return NULL;
+	thread_mutex_lock(&eventListMutex);
+	Cookai::ChunkedConnection::Event *ev = eventList.front();
+	eventList.pop_front();
+	thread_mutex_unlock(&eventListMutex);
+	return ev;
+    }
+
+    bool EventPool::InvokeOne(void){
+	Cookai::ChunkedConnection::Event *ev = Pop();
+	if(ev != NULL){
+	    ev->Invoke();
+	    return true;
 	}
+	return false;
+    }
 
-	ChunkedConnection::~ChunkedConnection(void)
-	{
-	}
+    int EventPool::InvokeAll(void){
+	int i = 0;
 
-}; /* namespace Cookai */
+	while(InvokeOne())
+	    i++;
+
+	return i;
+    }
+
+};
+};
