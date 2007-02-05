@@ -173,7 +173,7 @@ char *upnp_discover(char *ST){
 		if(ioctl(sock, SIOCGIFBRDADDR, &ifr) >= 0){
 			dest.sin_addr.s_addr = ifr.ifr_broadaddr;
 #endif
-			setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
+			setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (void *)&yes, sizeof(yes));
 			if(sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0){
 				closeSocket(sock);
 				return NULL;

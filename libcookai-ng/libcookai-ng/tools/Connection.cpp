@@ -28,6 +28,7 @@
 #include "../config.h"
 #include <string>
 #include <string.h>
+#include <errno.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -59,6 +60,8 @@ namespace Cookai {
 
     bool Connection::Initialize(char *name, char *service, size_t newChunkSize){
 	fd = -1;
+	nbConnect = NULL;
+	status = STATUS_DISOCNNECTED;
 	chunkSize = 500;
 	if(newChunkSize > 500)
 	    chunkSize = newChunkSize;
@@ -74,7 +77,15 @@ namespace Cookai {
 
 	if(name == NULL || service == NULL)
 	    return false;
-	LookupIPPort(name, service, &remoteName, &remoteService);
+	remoteName = strdup(name);
+	if(remoteName == NULL)
+	    return false;
+	remoteService = strdup(service);
+	if(remoteService == NULL){
+	    free(remoteName);
+	    remoteName = NULL;
+	    return false;
+	}
 
 	return true;
     }
@@ -93,7 +104,14 @@ namespace Cookai {
 		return false;
 	}
 	/* XXX */
-	readBuffer->readFromFD(fd, 1);
+	int ret = readBuffer->readFromSocket(fd, 1);
+
+	if(ret < 0){
+	    // error
+	}else if(ret == 0){
+	    // EOF
+	}
+	return true;
     }
 
     Connection::Connection(char *name, char *service, size_t newChunkSize){
@@ -113,10 +131,12 @@ namespace Cookai {
 	    delete readBuffer;
 	if(writeBuffer != NULL)
 	    delete writeBuffer;
+	if(nbConnect != NULL)
+	    delete nbConnect;
     }
 
     bool Connection::IsConnect(){
-	if(fd >= 0)
+	if(fd >= 0 && status == STATUS_CONNECTED)
 	    return true;
 	return false;
     }
@@ -125,16 +145,34 @@ namespace Cookai {
 	if(remoteName == NULL || remoteService == NULL)
 	    return false;
 
-	fd = connect_stream(remoteName, remoteService);
-#ifdef HAVE_FCNTL
-	fcntl(fd, F_SETFL, O_NONBLOCK);
-#endif
-#ifdef HAVE_IOCTLSOCKET
-	{
-	    unsigned long argp = 1;
-	    ioctlsocket(fd, FIONBIO, &argp);
+	if(fd < 0){
+	    if(nbConnect == NULL){
+		nbConnect = new NonBlockConnect();
+		if(nbConnect == NULL)
+		    return false;
+		{
+		    char *name, *service;
+		    LookupIPPort(remoteName, remoteService, &name, &service);
+		    if(nbConnect->SetTarget(remoteName, remoteService) != true){
+			free(name); free(service);
+			return false;
+		    }
+		    free(name); free(service);
+		}
+	    }
+	    switch(nbConnect->Run(&fd)){
+		case NonBlockConnect::CONNECTED:
+		    ///XXXXX
+		    break;
+		case NonBlockConnect::TRYING:
+		    break;
+		case NonBlockConnect::FAILED:
+		default:
+		    break;
+	    }
 	}
-#endif
+
+	nbConnect->Run(&fd);
 	{
 	    int optval;
 	    socklen_t optlen;
@@ -146,6 +184,17 @@ namespace Cookai {
 	return Handshake();
     }
 
+    void Connection::Disconnect(){
+	if(fd >= 0){
+	    shutdown(fd, 2);
+#ifdef HAVE_CLOSESOCKET
+	    closesocket(fd);
+#else
+	    close(fd);
+#endif
+	    fd = -1;
+	}
+    }
 
 
 };
