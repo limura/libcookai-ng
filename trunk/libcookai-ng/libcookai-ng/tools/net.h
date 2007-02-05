@@ -48,6 +48,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 int connect_stream(char *remote, char *service);
+int connect_stream_nonblock(char *remote, char *service);
 int connect_dgram(char *remote, char *remote_service);
 int bind_any_stream(int sock, char *service);
 int listen_stream(char *port, int type);

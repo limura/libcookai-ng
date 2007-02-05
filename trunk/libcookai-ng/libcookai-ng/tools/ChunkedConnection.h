@@ -70,6 +70,7 @@ namespace Cookai {
 	unsigned char *StreamRead(size_t *length, int channel = 0);
 
 	bool RunRead();
+	bool RunWrite();
 	void SetBlockReadHandler(chunkReadHandler handler, int channel = 0);
 	void SetStreamReadHandler(chunkReadHandler handler, int channel = 0);
     };

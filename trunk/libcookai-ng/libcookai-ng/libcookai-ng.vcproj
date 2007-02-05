@@ -251,6 +251,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\tools\cdopen.c"
+					>
+				</File>
+				<File
 					RelativePath=".\tools\ChunkedConnection.cpp"
 					>
 				</File>
@@ -279,6 +283,10 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\tools\NonBlockConnect.cpp"
+					>
 				</File>
 				<File
 					RelativePath=".\tools\StaticBuffer.cpp"
@@ -435,6 +443,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\tools\cdopen.h"
+					>
+				</File>
+				<File
 					RelativePath=".\tools\ChunkedConnection.h"
 					>
 				</File>
@@ -444,6 +456,10 @@
 				</File>
 				<File
 					RelativePath=".\tools\net.h"
+					>
+				</File>
+				<File
+					RelativePath=".\tools\NonBlockConnect.h"
 					>
 				</File>
 				<File

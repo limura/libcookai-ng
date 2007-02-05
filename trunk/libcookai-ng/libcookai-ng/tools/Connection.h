@@ -32,6 +32,7 @@
 
 #include "../config.h"
 #include "StaticBuffer.h"
+#include "NonBlockConnect.h"
 
 namespace Cookai {
 
@@ -46,7 +47,14 @@ namespace Cookai {
     class Connection
     {
     private:
+	typedef enum {
+	    STATUS_CONNECTING,
+	    STATUS_CONNECTED,
+	    STATUS_DISOCNNECTED,
+	} ConnectionStatus;
+	ConnectionStatus status;
 	int fd;
+	NonBlockConnect *nbConnect;
 	size_t chunkSize;
 	char *remoteName, *remoteService;
 	StaticBuffer *readBuffer, *writeBuffer;

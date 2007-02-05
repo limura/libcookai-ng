@@ -84,24 +84,22 @@ bool StaticBuffer::write(unsigned char *buf, size_t dataSize){
     return true;
 }
 
-bool StaticBuffer::readFromFD(int fd, size_t dataSize){
+int StaticBuffer::readFromSocket(int fd, size_t dataSize){
     if(fd < 0)
-	return false;
+	return -1;
     if(dataSize + now > size){
 	/* skip */
 
-	return false;
+	return -1;
     }
-#ifdef HAVE__READ
-    int length = _read(fd, &buf[now], dataSize);
-#else
-    int length = read(fd, &buf[now], dataSize);
-#endif
-    if(length == 0){ // EOF
-    }else if(length < 0){ // error
+    int length = recv(fd, &buf[now], datasize, 0);
+    if(length < 0){ // error
+	return -1;
+    }else{
+	now += length;
     }
 
-    return true;
+    return length;
 }
 
 };
