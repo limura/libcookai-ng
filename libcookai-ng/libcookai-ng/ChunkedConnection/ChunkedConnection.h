@@ -22,32 +22,33 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * $Id$
+ * $Id: ChunkedConnection.h 29 2007-02-05 00:51:58Z uirou.j $
  */
 
-#ifndef COOKAI_CHUNKED_CONNECTION
-#define COOKAI_CHUNKED_CONNECTION
+#ifndef COOKAI_CHUNKED_CONNECTION_H
+#define COOKAI_CHUNKED_CONNECTION_H
 
 #include <string>
 #include <list>
 
 #include "../config.h"
-#include "thread.h"
+#include "../tools/thread.h"
 #include "StaticBuffer.h"
 #include "Connection.h"
+#include "Event.h"
 
 namespace Cookai {
+namespace ChunkedConnection {
 
-#define CHUNKED_CONNECTION_MAX_CHANNEL (256)
+#define CHUNKED_CONNECTION_MAX_CHANNEL (256) /* unsigned char */
 
-    typedef bool (*chunkReadHandler)(unsigned char *buf, size_t length, int channel);
+    typedef enum {
+	THREADED,
+	NON_BLOCKING_IO,
+    } AccessType;
 
     class ChunkedConnection{
     public:
-	typedef enum {
-	    THREADED,
-	    NON_BLOCKING_IO,
-	} AccessType;
     private:
 	AccessType type;
 	bool threadEnable;
@@ -75,6 +76,7 @@ namespace Cookai {
 	void SetStreamReadHandler(chunkReadHandler handler, int channel = 0);
     };
 
+}; /* namespace ChunkedConnection */
 }; /* namespace Cookai */
 
 #endif /* COOKAI_CHUNKED_CONNECTION */

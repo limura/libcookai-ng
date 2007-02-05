@@ -22,13 +22,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * $Id$
+ * $Id: StaticBuffer.h 29 2007-02-05 00:51:58Z uirou.j $
  */
 
 #ifndef COOKAI_STATIC_BUFFER
 #define COOKAI_STATIC_BUFFER
 
 namespace Cookai {
+namespace ChunkedConnection {
 
     class StaticBuffer
     {
@@ -46,6 +47,7 @@ namespace Cookai {
 	bool write(unsigned char *buf, size_t size);
 	int readFromSocket(int fd, size_t size);
     };
+};
 };
 
 #endif /* COOKAI_STATIC_BUFFER */

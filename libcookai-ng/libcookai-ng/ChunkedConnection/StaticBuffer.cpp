@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * $Id$
+ * $Id: StaticBuffer.cpp 29 2007-02-05 00:51:58Z uirou.j $
  */
 
 #include "../config.h"
@@ -46,9 +46,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../tools/StaticBuffer.h"
+#include "StaticBuffer.h"
 
 namespace Cookai {
+namespace ChunkedConnection {
 
 StaticBuffer::StaticBuffer(size_t bufsize)
 {
@@ -92,7 +93,7 @@ int StaticBuffer::readFromSocket(int fd, size_t dataSize){
 
 	return -1;
     }
-    int length = recv(fd, &buf[now], datasize, 0);
+    int length = recv(fd, (char *)&buf[now], dataSize, 0);
     if(length < 0){ // error
 	return -1;
     }else{
@@ -102,4 +103,5 @@ int StaticBuffer::readFromSocket(int fd, size_t dataSize){
     return length;
 }
 
+};
 };

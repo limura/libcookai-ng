@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * $Id$
+ * $Id: Connection.h 29 2007-02-05 00:51:58Z uirou.j $
  */
 
 #ifndef COOKAI_CONNECTION
@@ -35,6 +35,7 @@
 #include "NonBlockConnect.h"
 
 namespace Cookai {
+namespace ChunkedConnection {
 
     typedef bool (*chunkReadHandler)(unsigned char *buf, size_t length, int channel);
     typedef struct _ChunkData{
@@ -81,6 +82,7 @@ namespace Cookai {
 	size_t NonBlockWrite(unsigned char *buf, size_t length);
 	StaticBuffer *NonBlockRead(int *channel, bool *isStream);
     };
+};
 };
 
 #endif /* COOKAI_STATIC_BUFFER */
