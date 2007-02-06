@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * $Id: ChunkedConnection.cpp 25 2007-01-31 14:36:32Z uirou.j $
+ * $Id$
  */
 
 #include "ChunkedConnection.h"
