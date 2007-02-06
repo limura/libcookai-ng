@@ -38,14 +38,14 @@ namespace ChunkedConnection {
 	thread_mutex_destroy(&eventListMutex);
     }
 
-    bool EventPool::Push(Cookai::ChunkedConnection::Event *newEvent){
+    bool EventPool::AddEvent(Cookai::ChunkedConnection::Event *newEvent){
 	thread_mutex_lock(&eventListMutex);
 	eventList.push_back(newEvent);
 	thread_mutex_unlock(&eventListMutex);
 	return true;
     }
 
-    Cookai::ChunkedConnection::Event *EventPool::Pop(void){
+    Cookai::ChunkedConnection::Event *EventPool::GetEvent(void){
 	if(eventList.empty())
 	    return NULL;
 	thread_mutex_lock(&eventListMutex);
@@ -56,12 +56,13 @@ namespace ChunkedConnection {
     }
 
     bool EventPool::InvokeOne(void){
-	Cookai::ChunkedConnection::Event *ev = Pop();
-	if(ev != NULL){
-	    ev->Invoke();
-	    return true;
-	}
-	return false;
+	Cookai::ChunkedConnection::Event *ev = GetEvent();
+	if(ev == NULL)
+	    return false;
+
+	ev->Invoke();
+	delete ev;
+	return true;
     }
 
     int EventPool::InvokeAll(void){

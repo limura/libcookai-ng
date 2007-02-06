@@ -25,6 +25,10 @@
  * $Id: StaticBuffer.h 29 2007-02-05 00:51:58Z uirou.j $
  */
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
 #ifndef COOKAI_STATIC_BUFFER
 #define COOKAI_STATIC_BUFFER
 
@@ -35,17 +39,34 @@ namespace ChunkedConnection {
     {
     private:
 	size_t size;
-	size_t now;
+	size_t writePos, readPos;
 	unsigned char *buf;
     public:
 	StaticBuffer(size_t size);
+	StaticBuffer(unsigned char *buf, size_t size); // Ç±Ç±Ç≈éwíËÇ≥ÇÍÇΩ buf ÇÕ StaticBuffer ä«óùÇ≈ free() Ç≥ÇÍÇÈ
 	~StaticBuffer(void);
 
-	unsigned char *getBuffer(void);
-	size_t getDataLength(void);
-	size_t getBufferSize(void);
-	bool write(unsigned char *buf, size_t size);
-	int readFromSocket(int fd, size_t size);
+	unsigned char *GetBuffer(void);
+	size_t GetDataLength(void);
+	size_t GetBufferSize(void);
+	size_t GetAvailableSize(void);
+	int ReadFromSocket(int fd, size_t size);
+
+	bool Write(unsigned char *buf, size_t size);
+	bool WriteUint8(uint8_t n);
+	bool WriteUint16(uint16_t n);
+	bool WriteUint32(uint32_t n);
+	bool WriteInt8(int8_t n);
+	bool WriteInt16(int16_t n);
+	bool WriteInt32(int32_t n);
+
+	size_t Read(unsigned char *dst, size_t size);
+	uint8_t ReadUint8(void);
+	uint16_t ReadUint16(void);
+	uint32_t ReadUint32(void);
+	int8_t ReadInt8(void);
+	int16_t ReadInt16(void);
+	int32_t ReadInt32(void);
     };
 };
 };

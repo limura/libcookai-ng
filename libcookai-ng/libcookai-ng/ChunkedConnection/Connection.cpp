@@ -53,9 +53,16 @@ namespace ChunkedConnection {
     bool Connection::LookupIPPort(char *name, char *service, char **newName, char **newService){
 	if(name == NULL || service == NULL || newName == NULL || newService == NULL)
 	    return false;
+	*newName = *newService = NULL;
 	/* now use DNS or IP addr */
-	remoteName = strdup(name);
-	remoteService = strdup(service);
+	*newName = strdup(name);
+	if(*newName == NULL)
+	    return false;
+	*newService = strdup(service);
+	if(*newService == NULL){
+	    free(*newName);
+	    return false;
+	}
 	return true;
     }
 
@@ -69,12 +76,8 @@ namespace ChunkedConnection {
 	remoteName = NULL;
 	remoteService = NULL;
 	readBuffer = NULL;
-	writeBuffer = NULL;
-
-	for(int i = 0; i < COOKAI_CONNECTION_MAX_CHANNEL; i++){
-	    blockReadHandler[i] = NULL;
-	    streamReadHandler[i] = NULL;
-	}
+	writeBufferList.clear();
+	thread_mutex_init(&writeBufferMutex, NULL);
 
 	if(name == NULL || service == NULL)
 	    return false;
@@ -105,7 +108,7 @@ namespace ChunkedConnection {
 		return false;
 	}
 	/* XXX */
-	int ret = readBuffer->readFromSocket(fd, 1);
+	int ret = readBuffer->ReadFromSocket(fd, 1);
 
 	if(ret < 0){
 	    // error
@@ -130,10 +133,14 @@ namespace ChunkedConnection {
 	    free(remoteService);
 	if(readBuffer != NULL)
 	    delete readBuffer;
-	if(writeBuffer != NULL)
-	    delete writeBuffer;
+	while(!writeBufferList.empty()){
+	    StaticBuffer *sb = writeBufferList.front();
+	    delete sb;
+	    writeBufferList.pop_front();
+	}
 	if(nbConnect != NULL)
 	    delete nbConnect;
+	thread_mutex_destroy(&writeBufferMutex);
     }
 
     bool Connection::IsConnect(){
@@ -153,7 +160,8 @@ namespace ChunkedConnection {
 		    return false;
 		{
 		    char *name, *service;
-		    LookupIPPort(remoteName, remoteService, &name, &service);
+		    if(LookupIPPort(remoteName, remoteService, &name, &service) != true)
+			return false;
 		    if(nbConnect->SetTarget(remoteName, remoteService) != true){
 			free(name); free(service);
 			return false;
@@ -195,6 +203,31 @@ namespace ChunkedConnection {
 #endif
 	    fd = -1;
 	}
+    }
+
+    Cookai::ChunkedConnection::Connection::ConnectionStatus Connection::Run(void){
+	if(fd < 0)
+	    Connect();
+	if(fd < 0)
+	    return STATUS_CONNECTING;
+
+	return STATUS_CONNECTED;
+    }
+
+    bool Connection::NonBlockWrite(unsigned char *buf, size_t length){
+	if(length <= 0 || buf == NULL)
+	    return false;
+	StaticBuffer *staticBuf = new StaticBuffer(length);
+	if(staticBuf == NULL)
+	    return false;
+	staticBuf->Write(buf, length);
+	return NonBlockWrite(staticBuf);
+    }
+    bool Connection::NonBlockWrite(StaticBuffer *buf){
+	thread_mutex_lock(&writeBufferMutex);
+	writeBufferList.push_back(buf);
+	thread_mutex_unlock(&writeBufferMutex);
+	return true;
     }
 
 };

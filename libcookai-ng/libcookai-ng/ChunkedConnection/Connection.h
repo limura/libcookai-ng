@@ -29,10 +29,12 @@
 #define COOKAI_CONNECTION
 
 #include <string>
+#include <list>
 
 #include "../config.h"
 #include "StaticBuffer.h"
 #include "NonBlockConnect.h"
+#include "../tools/thread.h"
 
 namespace Cookai {
 namespace ChunkedConnection {
@@ -58,10 +60,10 @@ namespace ChunkedConnection {
 	NonBlockConnect *nbConnect;
 	size_t chunkSize;
 	char *remoteName, *remoteService;
-	StaticBuffer *readBuffer, *writeBuffer;
-#define COOKAI_CONNECTION_MAX_CHANNEL (256)
-	chunkReadHandler blockReadHandler[COOKAI_CONNECTION_MAX_CHANNEL];
-	chunkReadHandler streamReadHandler[COOKAI_CONNECTION_MAX_CHANNEL];
+	StaticBuffer *readBuffer;
+	typedef std::list<StaticBuffer *> WriteBufferList;
+	WriteBufferList writeBufferList;
+	thread_mutex writeBufferMutex;
 
 	bool LookupIPPort(char *name, char *service, char **newName, char **newService);
 	bool Initialize(char *name, char *service, size_t newChunkSize);
@@ -77,9 +79,9 @@ namespace ChunkedConnection {
 	bool IsConnect(void);
 	void Disconnect(void);
 
-
-
-	size_t NonBlockWrite(unsigned char *buf, size_t length);
+	ConnectionStatus Run(void);
+	bool NonBlockWrite(unsigned char *buf, size_t length);
+	bool NonBlockWrite(StaticBuffer *buf);
 	StaticBuffer *NonBlockRead(int *channel, bool *isStream);
     };
 };
