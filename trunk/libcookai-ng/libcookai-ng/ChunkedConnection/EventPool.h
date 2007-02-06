@@ -46,8 +46,8 @@ namespace ChunkedConnection {
 	EventPool(void);
 	~EventPool(void);
 
-	bool Push(Cookai::ChunkedConnection::Event *newEvent);
-	Cookai::ChunkedConnection::Event *Pop(void);
+	bool AddEvent(Cookai::ChunkedConnection::Event *newEvent);
+	Cookai::ChunkedConnection::Event *GetEvent(void);
 	bool InvokeOne(void);
 	int InvokeAll(void);
     };

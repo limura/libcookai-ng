@@ -58,7 +58,14 @@ StaticBuffer::StaticBuffer(size_t bufsize)
     if(size > 0)
 	buf = (unsigned char *)malloc(size);
 
-    now = 0;
+    writePos = 0;
+    readPos = 0;
+}
+StaticBuffer::StaticBuffer(unsigned char *originalBuf, size_t size){
+    buf = originalBuf;
+    size = size;
+    writePos = 0;
+    readPos = 0;
 }
 
 StaticBuffer::~StaticBuffer(void)
@@ -67,40 +74,145 @@ StaticBuffer::~StaticBuffer(void)
 	free(buf);
 }
 
-unsigned char *StaticBuffer::getBuffer(void){
+unsigned char *StaticBuffer::GetBuffer(void){
     return buf;
 }
-size_t StaticBuffer::getDataLength(void){
-    return now;
+size_t StaticBuffer::GetDataLength(void){
+    return writePos;
 }
-size_t StaticBuffer::getBufferSize(void){
+size_t StaticBuffer::GetBufferSize(void){
     return size;
 }
-bool StaticBuffer::write(unsigned char *buf, size_t dataSize){
-    if(dataSize > size - now)
-	return false;
-
-    memcpy(&buf[now], buf, dataSize);
-    now += dataSize;
-    return true;
+size_t StaticBuffer::GetAvailableSize(void){
+    return size - writePos;
 }
-
-int StaticBuffer::readFromSocket(int fd, size_t dataSize){
+int StaticBuffer::ReadFromSocket(int fd, size_t dataSize){
     if(fd < 0)
 	return -1;
-    if(dataSize + now > size){
+    if(dataSize + writePos > size){
 	/* skip */
 
 	return -1;
     }
-    int length = recv(fd, (char *)&buf[now], dataSize, 0);
+    int length = recv(fd, (char *)&buf[writePos], (int)dataSize, 0);
     if(length < 0){ // error
 	return -1;
     }else{
-	now += length;
+	writePos += length;
     }
 
     return length;
+}
+
+bool StaticBuffer::Write(unsigned char *buf, size_t dataSize){
+    if(dataSize > size - writePos)
+	return false;
+
+    memcpy(&buf[writePos], buf, dataSize);
+    writePos += dataSize;
+    return true;
+}
+
+bool StaticBuffer::WriteUint8(uint8_t n){
+    if(size - writePos < sizeof(uint8_t))
+	return false;
+    buf[writePos] = (unsigned char)n;
+    writePos++;
+    return true;
+}
+bool StaticBuffer::WriteUint16(uint16_t n){
+    if(size - writePos < sizeof(uint16_t))
+	return false;
+    n = htons(n);
+    memcpy(&buf[writePos], &n, sizeof(uint16_t));
+    writePos += sizeof(uint16_t);
+    return true;
+}
+bool StaticBuffer::WriteUint32(uint32_t n){
+    if(size - writePos < sizeof(uint32_t))
+	return false;
+    n = htonl(n);
+    memcpy(&buf[writePos], &n, sizeof(uint32_t));
+    writePos += sizeof(uint32_t);
+    return true;
+}
+bool StaticBuffer::WriteInt8(int8_t n){
+    if(size - writePos < sizeof(int8_t))
+	return false;
+    buf[writePos] = (unsigned char)n;
+    writePos++;
+    return true;
+}
+bool StaticBuffer::WriteInt16(int16_t n){
+    if(size - writePos < sizeof(int16_t))
+	return false;
+    n = htons(n);
+    memcpy(&buf[writePos], &n, sizeof(int16_t));
+    writePos += sizeof(int16_t);
+    return true;
+}
+bool StaticBuffer::WriteInt32(int32_t n){
+    if(size - writePos < sizeof(int32_t))
+	return false;
+    n = htonl(n);
+    memcpy(&buf[writePos], &n, sizeof(int32_t));
+    writePos += sizeof(int32_t);
+    return true;
+}
+
+size_t StaticBuffer::Read(unsigned char *dst, size_t size){
+    if(writePos - readPos < size)
+	return 0;
+    memcpy(dst, &buf[readPos], size);
+    readPos += size;
+    return size;
+}
+
+uint8_t StaticBuffer::ReadUint8(void){
+    if(writePos - readPos < sizeof(uint8_t))
+	return 0;
+    return (uint8_t)buf[readPos++];
+}
+uint16_t StaticBuffer::ReadUint16(void){
+    if(writePos - readPos < sizeof(uint16_t))
+	return 0;
+    uint16_t n;
+    memcpy(&n, &buf[readPos], sizeof(uint16_t));
+    n = ntohs(n);
+    readPos += sizeof(uint16_t);
+    return n;
+}
+uint32_t StaticBuffer::ReadUint32(void){
+    if(writePos - readPos < sizeof(uint32_t))
+	return 0;
+    uint32_t n;
+    memcpy(&n, &buf[readPos], sizeof(uint32_t));
+    n = ntohl(n);
+    readPos += sizeof(uint32_t);
+    return n;
+}
+int8_t StaticBuffer::ReadInt8(void){
+    if(writePos - readPos < sizeof(int8_t))
+	return 0;
+    return (int8_t)buf[readPos++];
+}
+int16_t StaticBuffer::ReadInt16(void){
+    if(writePos - readPos < sizeof(int16_t))
+	return 0;
+    int16_t n;
+    memcpy(&n, &buf[readPos], sizeof(int16_t));
+    n = ntohs(n);
+    readPos += sizeof(int16_t);
+    return n;
+}
+int32_t StaticBuffer::ReadInt32(void){
+    if(writePos - readPos < sizeof(int32_t))
+	return 0;
+    int32_t n;
+    memcpy(&n, &buf[readPos], sizeof(int32_t));
+    n = ntohl(n);
+    readPos += sizeof(int32_t);
+    return n;
 }
 
 };

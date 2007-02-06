@@ -37,6 +37,8 @@ namespace ChunkedConnection {
     }
 
     Event::~Event(void){
+	if(data != NULL)
+	    free(data);
     }
 
     unsigned char *Event::GetData(void){
