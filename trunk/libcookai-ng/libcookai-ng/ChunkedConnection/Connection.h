@@ -32,20 +32,21 @@
 #include <list>
 
 #include "../config.h"
+#include "../tools/thread.h"
 #include "StaticBuffer.h"
 #include "NonBlockConnect.h"
-#include "../tools/thread.h"
+#include "Event.h"
 
 namespace Cookai {
 namespace ChunkedConnection {
 
-    typedef bool (*chunkReadHandler)(unsigned char *buf, size_t length, int channel);
-    typedef struct _ChunkData{
+#define COOKAI_CHUNKEDCONNECTION_HEADERLENGTH (4)
+#define COOKAI_CHUNKEDCONNECTION_MAX_DATALENGTH (1414*256)
+    typedef struct {
+	uint8_t nextChunkNum;
+	uint8_t channel;
 	uint16_t length;
-	unsigned char nextChunkNum;
-	unsigned char channel;
-	unsigned char dataStartPoint;
-    } ChunkData;
+    } ChunkHeader;
 
     class Connection
     {
@@ -61,14 +62,19 @@ namespace ChunkedConnection {
 	size_t chunkSize;
 	char *remoteName, *remoteService;
 	StaticBuffer *readBuffer;
+	StaticBuffer *readHeaderBuffer;
 	typedef std::list<StaticBuffer *> WriteBufferList;
 	WriteBufferList writeBufferList;
 	thread_mutex writeBufferMutex;
+	Cookai::ChunkedConnection::Event *streamEvent;
+	Cookai::ChunkedConnection::Event *blockEvent;
+	size_t blockChunkLength;
+	int nowChunkNum;
 
 	bool LookupIPPort(char *name, char *service, char **newName, char **newService);
 	bool Initialize(char *name, char *service, size_t newChunkSize);
 	bool Handshake(void);
-	bool Read();
+	bool Read(void);
 
     public:
 	Connection(char *name, char *service, size_t chunkSize = 1414);
@@ -79,7 +85,7 @@ namespace ChunkedConnection {
 	bool IsConnect(void);
 	void Disconnect(void);
 
-	ConnectionStatus Run(void);
+	Cookai::ChunkedConnection::EventType Run(Event **eventReturn);
 	bool NonBlockWrite(unsigned char *buf, size_t length);
 	bool NonBlockWrite(StaticBuffer *buf);
 	StaticBuffer *NonBlockRead(int *channel, bool *isStream);

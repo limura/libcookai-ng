@@ -29,9 +29,9 @@
 
 namespace Cookai{
 namespace ChunkedConnection {
-    Event::Event(unsigned char *Data, size_t Size, int Channel, chunkReadHandler Handler){
-	data = Data;
-	dataSize = Size;
+    Event::Event(EventType Type, StaticBuffer *Buf, int Channel, ReadHandler Handler){
+	type = Type;
+	buf = Buf;
 	channel = Channel;
 	handler = Handler;
     }
@@ -41,11 +41,11 @@ namespace ChunkedConnection {
 	    free(data);
     }
 
-    unsigned char *Event::GetData(void){
-	return data;
+    EventType Event::GetEventType(void){
+	return type;
     }
-    size_t Event::GetSize(void){
-	return dataSize;
+    StaticBuffer *Event::GetBuffer(void){
+	return buf;
     }
     int Event::GetChannel(void){
 	return channel;
@@ -53,7 +53,7 @@ namespace ChunkedConnection {
 
     bool Event::Invoke(void){
 	if(handler != NULL){
-	    handler(data, dataSize, channel);
+	    handler(type, buf, channel);
 	    return true;
 	}
 	return false;
