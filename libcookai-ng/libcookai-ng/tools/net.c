@@ -294,6 +294,7 @@ int connect_dgram(char *remote, char *service){
 	    continue;
 	}*/
 
+#ifdef DEBUG
 	switch(res->ai_family){
 	case PF_INET:
 	    t = '4';
@@ -306,6 +307,7 @@ int connect_dgram(char *remote, char *service){
 	    break;
 	}
 	DPRINTF(0, ("type: %c\n", t));
+#endif /* DEBUG */
 
 	sendto(s, &t, 1, 0, res->ai_addr, (int)res->ai_addrlen);
 	DPRINTF(0, ("send SYN\n"));

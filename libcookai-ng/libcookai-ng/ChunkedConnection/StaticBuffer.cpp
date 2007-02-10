@@ -57,12 +57,20 @@ StaticBuffer::StaticBuffer(size_t bufsize)
     buf = NULL;
     if(size > 0)
 	buf = (unsigned char *)malloc(size);
+    if(buf != NULL)
+	memset(buf, 0, size);
 
     writePos = 0;
     readPos = 0;
 }
 StaticBuffer::StaticBuffer(unsigned char *originalBuf, size_t size){
-    buf = originalBuf;
+    if(originalBuf == NULL && size > 0){
+	buf = (unsigned char *)malloc(size);
+	if(buf != NULL)
+	    memset(buf, 0, size);
+    }else{
+	buf = originalBuf;
+    }
     size = size;
     writePos = 0;
     readPos = 0;
@@ -75,7 +83,9 @@ StaticBuffer::~StaticBuffer(void)
 }
 
 unsigned char *StaticBuffer::GetBuffer(void){
-    return buf;
+    if(readPos >= size)
+	return NULL;
+    return &buf[readPos];
 }
 size_t StaticBuffer::GetDataLength(void){
     return writePos;
@@ -86,22 +96,104 @@ size_t StaticBuffer::GetBufferSize(void){
 size_t StaticBuffer::GetAvailableSize(void){
     return size - writePos;
 }
-int StaticBuffer::ReadFromSocket(int fd, size_t dataSize){
+
+// return value list
+// value == 0: read data complete.
+// value < 0: error
+// value > 0: not complete.
+int StaticBuffer::ReadFromSocket(int fd, size_t *readSize){
     if(fd < 0)
 	return -1;
-    if(dataSize + writePos > size){
-	/* skip */
-
-	return -1;
+    if(writePos >= size){
+	return 0;
     }
-    int length = recv(fd, (char *)&buf[writePos], (int)dataSize, 0);
+    if(*readSize > size - writePos)
+	*readSize = size - writePos;
+
+    errno = 0;
+#ifdef HAVE_WSAGETLASTERROR
+    WSASetLastError(0);
+#endif
+    int length = recv(fd, (char *)&buf[writePos], (int)*readSize, 0);
     if(length < 0){ // error
+	if(
+#ifdef EWOULDBLOCK
+	    errno == EWOULDBLOCK
+#endif
+#ifdef HAVE_WSAGETLASTERROR
+	    WSAGetLastError() == WSAEWOULDBLOCK
+#endif
+#ifdef EAGAIN
+	    errno == EAGAIN
+#endif
+	    ){
+		return 1;
+	}
 	return -1;
     }else{
 	writePos += length;
+	*readSize -= length;
+	if(*readSize == 0){
+	    return 0;
+	}
     }
 
+    return 1;
+}
+
+int StaticBuffer::ReadFromSocket(int fd){
+    size_t tmpSize = size - writePos;
+    return ReadFromSocket(fd, &tmpSize);
+}
+
+// return value list
+// value == 0: send data complete.
+// value < 0: error
+// value > 0: not complete.
+int StaticBuffer::WriteToSocket(int fd){
+    if(fd < 0)
+	return -1;
+    if(readPos >= size)
+	return 0;
+    errno = 0;
+#ifdef HAVE_WSAGETLASTERROR
+    WSASetLastError(0);
+#endif
+    int length = send(fd, (char *)&buf[readPos], (int)(size - readPos), 0);
+    if(length < 0){
+	if(
+#ifdef EWOULDBLOCK
+	    errno == EWOULDBLOCK
+#endif
+#ifdef HAVE_WSAGETLASTERROR
+	    WSAGetLastError() == WSAEWOULDBLOCK
+#endif
+#ifdef EAGAIN
+	    errno == EAGAIN
+#endif
+	    ){
+	    return 1;
+	}
+	return -1;
+    }
+    readPos += length;
+    if(readPos == size)
+	return 0;
     return length;
+}
+
+bool StaticBuffer::WriteSeek(size_t newPosition){
+    if(newPosition > size)
+	return false;
+    writePos = newPosition;
+    return true;
+}
+
+bool StaticBuffer::ReadSeek(size_t newPosition){
+    if(newPosition > size)
+	return false;
+    readPos = newPosition;
+    return true;
 }
 
 bool StaticBuffer::Write(unsigned char *buf, size_t dataSize){

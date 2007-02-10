@@ -28,27 +28,36 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#include "StaticBuffer.h"
+
 #ifndef COOKAI_CHUNKEDCONNECTION_EVENT_H
 #define COOKAI_CHUNKEDCONNECTION_EVENT_H
 
 namespace Cookai{
 namespace ChunkedConnection{
 
-    typedef bool (*chunkReadHandler)(unsigned char *buf, size_t length, int channel);
+    typedef enum {
+	EVENT_NOTHING,
+	EVENT_RECIVE_BLOCK,
+	EVENT_RECIVE_STREAM,
+	EVENT_ERROR_SOCKET_CLOSE,
+	EVENT_ERROR_UNKNOWN,
+    } EventType;
+    typedef bool (*ReadHandler)(EventType type, StaticBuffer *buf, int channel);
 
     class Event {
     private:
-	unsigned char *data;
-	size_t dataSize;
+	EventType type;
+	StaticBuffer *buf;
 	int channel;
-	chunkReadHandler handler;
+	ReadHandler handler;
 
     public:
-	Event(unsigned char *data, size_t size, int Channel = 0, chunkReadHandler Handler = NULL);
+	Event(EventType type, StaticBuffer *buf, int Channel = 0, ReadHandler Handler = NULL);
 	~Event(void);
 
-	unsigned char *GetData(void);
-	size_t GetSize(void);
+	EventType GetEventType(void);
+	StaticBuffer *GetBuffer(void);
 	int GetChannel(void);
 	bool Invoke(void);
     };

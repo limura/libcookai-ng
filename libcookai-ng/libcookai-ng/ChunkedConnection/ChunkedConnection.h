@@ -48,6 +48,7 @@ namespace ChunkedConnection {
 	CONNECTION_CLOSE,
 	UNKNOWN_ERROR,
     } ErrorType;
+    typedef void (*chunkReadHandler)(Cookai::ChunkedConnection::ErrorType type);
     typedef void (*chunkErrorHandler)(Cookai::ChunkedConnection::ErrorType type);
 
     class ChunkedConnection{
@@ -68,7 +69,7 @@ namespace ChunkedConnection {
 	void Initialize(char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t ChunkSize = 1414);
 	StaticBuffer *CreateNewBuffer(void);
 	WriteQueue *GetWriteQueue(int channel);
-	void WriteHeader(int nextChunkNum, int channel, uint16_t length, unsigned char *buf);
+	void WriteHeader(int nextChunkNum, int channel, uint16_t length, StaticBuffer *buf);
 
     public:
 	ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);

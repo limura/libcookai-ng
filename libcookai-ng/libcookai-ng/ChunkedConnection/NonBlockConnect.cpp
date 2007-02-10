@@ -69,6 +69,10 @@ namespace ChunkedConnection {
 	}
 	if(fd >= 0){
 	    int ret;
+	    errno = 0;
+#ifdef HAVE_WSAGETLASTERROR
+    WSASetLastError(0);
+#endif
 	    ret = connect(fd, res->ai_addr, (int)res->ai_addrlen);
 	    if(ret < 0){
 		if(

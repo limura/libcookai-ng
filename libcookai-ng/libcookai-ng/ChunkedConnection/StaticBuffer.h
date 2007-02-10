@@ -25,6 +25,8 @@
  * $Id$
  */
 
+#include "../config.h"
+
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
@@ -50,9 +52,12 @@ namespace ChunkedConnection {
 	size_t GetDataLength(void);
 	size_t GetBufferSize(void);
 	size_t GetAvailableSize(void);
-	int ReadFromSocket(int fd, size_t size);
+	int ReadFromSocket(int fd);
+	int ReadFromSocket(int fd, size_t *size);
+	int WriteToSocket(int fd);
 
 	bool Write(unsigned char *buf, size_t size);
+	bool WriteSeek(size_t newPosition);
 	bool WriteUint8(uint8_t n);
 	bool WriteUint16(uint16_t n);
 	bool WriteUint32(uint32_t n);
@@ -61,6 +66,7 @@ namespace ChunkedConnection {
 	bool WriteInt32(int32_t n);
 
 	size_t Read(unsigned char *dst, size_t size);
+	bool ReadSeek(size_t newPosition);
 	uint8_t ReadUint8(void);
 	uint16_t ReadUint16(void);
 	uint32_t ReadUint32(void);

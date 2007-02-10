@@ -184,6 +184,7 @@
 #endif
 
 #if defined(WIN32) || defined(WIN64)
+
 #define _LIBCOOKAI_WINDOWS_
 #define DEBUG
 #undef HAVE_SYS_TIME_H
