@@ -25,53 +25,67 @@
  * $Id$
  */
 
+#include "Connector.h"
+#include "ConnectionManager.h"
 #include "EventPool.h"
 
 namespace Cookai {
 namespace ChunkedConnection {
-    EventPool::EventPool(void){
-	thread_mutex_init(&eventListMutex, NULL);
-	eventList.clear();
+    Connector::Connector(void){
+	manager = new ConnectionManager();
+	eventPool = new EventPool();
+	thread_create(&tid, (thread_func)LoopFunc, this);
     }
 
-    EventPool::~EventPool(void){
-	thread_mutex_destroy(&eventListMutex);
+    Connector::~Connector(void){
+	thread_cancel(&tid);
+	if(manager != NULL)
+	    delete manager;
+	if(eventPool != NULL)
+	    delete eventPool;
     }
 
-    bool EventPool::AddEvent(Cookai::ChunkedConnection::Event *newEvent){
-	thread_mutex_lock(&eventListMutex);
-	eventList.push_back(newEvent);
-	thread_mutex_unlock(&eventListMutex);
-	return true;
+    void Connector::LoopFunc(void *userData){
+	Connector *self = (Connector *)userData;
+	if(self == NULL)
+	    return;
+
+	while(1){
+	    self->RunTick(1000000);
+	}
     }
 
-    Cookai::ChunkedConnection::Event *EventPool::GetEvent(void){
-	if(eventList.empty())
-	    return NULL;
-	thread_mutex_lock(&eventListMutex);
-	Cookai::ChunkedConnection::Event *ev = eventList.front();
-	eventList.pop_front();
-	thread_mutex_unlock(&eventListMutex);
-	return ev;
+    void Connector::RunTick(int usec){
+	if(manager != NULL)
+	    manager->Run(usec);
     }
 
-    bool EventPool::InvokeOne(void){
-	Cookai::ChunkedConnection::Event *ev = GetEvent();
-	if(ev == NULL)
-	    return false;
-
-	ev->Invoke();
-	delete ev;
-	return true;
+    Cookai::ChunkedConnection::Event *Connector::NextEvent(void){
+	if(eventPool != NULL)
+	    return eventPool->GetEvent();
+	return NULL;
     }
 
-    int EventPool::InvokeAll(void){
-	int i = 0;
+    void Connector::InvokeAllEvent(void){
+	if(eventPool != NULL)
+	    eventPool->InvokeAll();
+    }
 
-	while(InvokeOne())
-	    i++;
+    Cookai::ChunkedConnection::ChunkedConnection *Connector::Connect(char *name, char *service,
+	ReadHandler streamHandler, ReadHandler blockHandler,
+	ReadHandler errorHandler, size_t chunkSize){
+	    Cookai::ChunkedConnection::ChunkedConnection *cc = new Cookai::ChunkedConnection::ChunkedConnection(name, service, eventPool, chunkSize);
+	    if(cc == NULL)
+		return NULL;
 
-	return i;
+	    cc->SetStreamReadHandler(streamHandler);
+	    cc->SetBlockReadHandler(blockHandler);
+	    cc->SetErrorHandler(errorHandler);
+	    manager->AddInterface(cc);
+
+	    cc->Connect();
+
+	    return cc;
     }
 };
 };

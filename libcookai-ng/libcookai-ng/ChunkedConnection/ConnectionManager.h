@@ -24,45 +24,59 @@
  * 
  * $Id$
  */
+#include "../config.h"
 
-#include <sys/types.h>
-#include <stdlib.h>
+#include <map>
 
-#include "StaticBuffer.h"
+#ifdef HAVE_POLL_H
+#include <poll.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
 
-#ifndef COOKAI_CHUNKEDCONNECTION_EVENT_H
-#define COOKAI_CHUNKEDCONNECTION_EVENT_H
+#include "ConnectionManagerInterface.h"
+
+#ifndef COOKAI_CHUNKEDCONNECTION_CONNECTIONMANAGER_H
+#define COOKAI_CHUNKEDCONNECTION_CONNECTIONMANAGER_H
 
 namespace Cookai{
-namespace ChunkedConnection{
+namespace ChunkedConnection {
 
-    typedef enum {
-	EVENT_NOTHING,
-	EVENT_RECIVE_BLOCK,
-	EVENT_RECIVE_STREAM,
-	EVENT_ERROR_SOCKET_CLOSE,
-	EVENT_ERROR_UNKNOWN,
-    } EventType;
-    typedef bool (*ReadHandler)(EventType type, StaticBuffer *buf, int channel);
-
-    class Event {
+    class ConnectionManager {
     private:
-	EventType type;
-	StaticBuffer *buf;
-	int channel;
-	ReadHandler handler;
-
+	typedef struct {
+	    int status;
+	    int fd;
+	    ConnectionManagerInterface *Interface;
+	} ManagerInterface;
+	typedef std::map<ConnectionManagerInterface *, ManagerInterface *> ConnectionStatusMap;
+	ConnectionStatusMap connectionStatusMap;
+	void Invoke(int fd, Cookai::ChunkedConnection::ConnectionStatus status);
+	void AddFDWatcher(int fd);
+	void DeleteFDWatcher(int fd);
+	ManagerInterface *GetManagerInterface(ConnectionManagerInterface *Interface);
+#ifdef HAVE_POLL
+	struct pollfd *pollfds;
+	int nfds;
+#else /* HAVE_POLL */
+#ifdef HAVE_SELECT
+	fd_set rfds, wfds;
+	int maxfd;
+#endif /* HAVE_SELECT */
+#endif /* HAVE_POLL */
     public:
-	Event(EventType type, StaticBuffer *buf, int Channel = 0, ReadHandler Handler = NULL);
-	~Event(void);
+	ConnectionManager(void);
+	~ConnectionManager(void);
 
-	void SetEventHandler(ReadHandler Handler);
-	EventType GetEventType(void);
-	StaticBuffer *GetBuffer(void);
-	int GetChannel(void);
-	bool Invoke(void);
+	void AddInterface(ConnectionManagerInterface *Interface);
+	void UpdateSelectStatus(ConnectionManagerInterface *Interface, int fd, Cookai::ChunkedConnection::ConnectionStatus status);
+	bool Run(int usec);
     };
 };
 };
 
-#endif /* COOKAI_CHUNKEDCONNECTION_EVENT_H */
+#endif /* COOKAI_CHUNKEDCONNECTION_CONNECTIONMANAGER_H */

@@ -138,6 +138,16 @@ namespace ChunkedConnection {
 	return false;
     }
 
+    int Connection::GetFD(void){
+	if(IsConnect()){
+	    return fd;
+	}
+	if(Connect()){
+	    return fd;
+	}
+	return -1;
+    }
+
     bool Connection::Connect(){
 	if(remoteName == NULL || remoteService == NULL)
 	    return false;
@@ -160,14 +170,16 @@ namespace ChunkedConnection {
 	    }
 	    switch(nbConnect->Run(&fd)){
 		case NonBlockConnect::CONNECTED:
-		    ///XXXXX
+		    return true;
 		    break;
 		case NonBlockConnect::TRYING:
+		    return true;
 		    break;
 		case NonBlockConnect::FAILED:
 		default:
-		    break;
+		    return false;
 	    }
+	    return false;
 	}
 
 	nbConnect->Run(&fd);
@@ -260,7 +272,7 @@ Run_ChunkHeaderReadPart:
 		    StaticBuffer *tmpStreamBuffer = new StaticBuffer(header.length);
 		    if(tmpStreamBuffer == NULL)
 			goto Run_SocketError;
-		    streamEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_STREAM, tmpStreamBuffer, header.channel, NULL);
+		    streamEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_STREAM, tmpStreamBuffer, header.channel);
 		    if(streamEvent == NULL){
 			delete tmpStreamBuffer;
 			goto Run_SocketError;
@@ -274,7 +286,7 @@ Run_ChunkHeaderReadPart:
 			StaticBuffer *tmpBlockBuffer = new StaticBuffer(bufferLength);
 			if(tmpBlockBuffer == NULL)
 			    goto Run_SocketError;
-			blockEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_BLOCK, tmpBlockBuffer, header.channel, NULL);
+			blockEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_BLOCK, tmpBlockBuffer, header.channel);
 			if(blockEvent == NULL){
 			    delete tmpBlockBuffer;
 			    goto Run_SocketError;

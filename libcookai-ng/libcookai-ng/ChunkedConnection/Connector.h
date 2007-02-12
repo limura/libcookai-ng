@@ -25,44 +25,40 @@
  * $Id$
  */
 
-#include <sys/types.h>
-#include <stdlib.h>
+#include "../config.h"
 
-#include "StaticBuffer.h"
+#include "../tools/thread.h"
+#include "ChunkedConnection.h"
+#include "ConnectionManager.h"
+#include "Event.h"
+#include "EventPool.h"
 
-#ifndef COOKAI_CHUNKEDCONNECTION_EVENT_H
-#define COOKAI_CHUNKEDCONNECTION_EVENT_H
+#ifndef COOKAI_CHUNKEDCONNECTION_CONNECTOR_H
+#define COOKAI_CHUNKEDCONNECTION_CONNECTOR_H
 
-namespace Cookai{
-namespace ChunkedConnection{
-
-    typedef enum {
-	EVENT_NOTHING,
-	EVENT_RECIVE_BLOCK,
-	EVENT_RECIVE_STREAM,
-	EVENT_ERROR_SOCKET_CLOSE,
-	EVENT_ERROR_UNKNOWN,
-    } EventType;
-    typedef bool (*ReadHandler)(EventType type, StaticBuffer *buf, int channel);
-
-    class Event {
+namespace Cookai {
+namespace ChunkedConnection {
+    class Connector {
     private:
-	EventType type;
-	StaticBuffer *buf;
-	int channel;
-	ReadHandler handler;
+	ConnectionManager *manager;
+	EventPool *eventPool;
+	threadID tid;
+	static void LoopFunc(void *userdata);
+
+    protected:
+	void RunTick(int usec);
 
     public:
-	Event(EventType type, StaticBuffer *buf, int Channel = 0, ReadHandler Handler = NULL);
-	~Event(void);
+	Connector(void);
+	~Connector(void);
 
-	void SetEventHandler(ReadHandler Handler);
-	EventType GetEventType(void);
-	StaticBuffer *GetBuffer(void);
-	int GetChannel(void);
-	bool Invoke(void);
+	ChunkedConnection *Connect(char *name, char *service,
+	    ReadHandler streamHander = NULL, ReadHandler blockHandler = NULL,
+	    ReadHandler errorHandler = NULL, size_t chunkSize = 1414);
+	Cookai::ChunkedConnection::Event *NextEvent(void);
+	void InvokeAllEvent(void);
     };
-};
+}
 };
 
-#endif /* COOKAI_CHUNKEDCONNECTION_EVENT_H */
+#endif /* COOKAI_CHUNKEDCONNECTION_CONNECTOR_H */

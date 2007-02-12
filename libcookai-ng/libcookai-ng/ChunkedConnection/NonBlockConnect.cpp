@@ -50,6 +50,8 @@ namespace ChunkedConnection {
 	hints.ai_canonname = NULL;
 	hints.ai_addr = NULL;
 	hints.ai_next = NULL;
+	if(res0 != NULL)
+	    freeaddrinfo(res0);
 
 	if(getaddrinfo(name, service, &hints, &res0)){
 	    status = NOT_INITIALIZED;

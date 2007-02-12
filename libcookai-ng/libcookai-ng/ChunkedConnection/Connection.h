@@ -84,6 +84,7 @@ namespace ChunkedConnection {
 	bool Connect(void);
 	bool IsConnect(void);
 	void Disconnect(void);
+	int GetFD(void);
 
 	Cookai::ChunkedConnection::EventType Run(Event **eventReturn);
 	bool NonBlockWrite(unsigned char *buf, size_t length);
