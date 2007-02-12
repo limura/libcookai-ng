@@ -71,11 +71,15 @@ namespace ChunkedConnection {
     public:
 	ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
 	ChunkedConnection(std::string name, std::string service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
+	ChunkedConnection(int acceptedFD, char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
 	~ChunkedConnection(void);
 
 	void SetBlockReadHandler(ReadHandler handler);
 	void SetStreamReadHandler(ReadHandler handler);
 	void SetErrorHandler(ReadHandler handler);
+
+	char *GetRemoteName(void);
+	char *GetRemoteService(void);
 
 	bool BlockWrite(unsigned char *buf, size_t length, int channel = 0);
 	bool BlockCommit(int channel = 0);

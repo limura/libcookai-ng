@@ -333,6 +333,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ChunkedConnection\ConnectionAcceptor.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\ChunkedConnection\ConnectionManager.cpp"
 					>
 				</File>
@@ -368,10 +372,6 @@
 				</File>
 				<File
 					RelativePath=".\ChunkedConnection\NonBlockConnect.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ChunkedConnection\RequestQueue.cpp"
 					>
 				</File>
 				<File
@@ -513,6 +513,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ChunkedConnection\ConnectionAcceptor.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ChunkedConnection\ConnectionManager.h"
 					>
 				</File>
@@ -534,10 +538,6 @@
 				</File>
 				<File
 					RelativePath=".\ChunkedConnection\NonBlockConnect.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ChunkedConnection\RequestQueue.h"
 					>
 				</File>
 				<File

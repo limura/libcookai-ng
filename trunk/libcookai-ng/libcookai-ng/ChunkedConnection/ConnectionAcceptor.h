@@ -27,26 +27,34 @@
 
 #include "../config.h"
 
-#ifndef COOKAI_CHUNKEDCONNECTION_CONNECTIONMANAGERINTARFACE_H
-#define COOKAI_CHUNKEDCONNECTION_CONNECTIONMANAGERINTARFACE_H
+#include "ConnectionManager.h"
+#include "ConnectionManagerInterface.h"
+#include "EventPool.h"
+
+#ifndef COOKAI_CHUNKEDCONNECTION_CONNECTIONACCEPTOR_H
+#define COOKAI_CHUNKEDCONNECTION_CONNECTIONACCEPTOR_H
 
 namespace Cookai {
 namespace ChunkedConnection {
-class ConnectionManager;
 
-    typedef enum {
-	CONNECTION_STATUS_NONE = 0,
-	CONNECTION_STATUS_READ_OK = 1,
-	CONNECTION_STATUS_WRITE_OK = 2,
-    } ConnectionStatus;
+#define COOKAI_DEFAULT_ACCEPT_PORT "1203"
 
-    class ConnectionManagerInterface {
+    class ConnectionAcceptor : public ConnectionManagerInterface {
+    private:
+	int acceptSocketFD;
+	ConnectionManager *connectionManager;
+	EventPool *eventPool;
+
     public:
-	virtual int Connect(void) = 0;
-	virtual void RegisterConnectionManager(Cookai::ChunkedConnection::ConnectionManager *cm) = 0;
-	virtual bool Run(Cookai::ChunkedConnection::ConnectionStatus status) = 0;
+	ConnectionAcceptor(EventPool *pool);
+	~ConnectionAcceptor(void);
+
+	int Connect(void);
+	int Connect(char *ServiceName);
+	void RegisterConnectionManager(Cookai::ChunkedConnection::ConnectionManager *cm);
+	bool Run(Cookai::ChunkedConnection::ConnectionStatus status);
     };
 };
 };
 
-#endif /* COOKAI_CHUNKEDCONNECTION_CONNECTIONMANAGERINTARFACE_H */
+#endif /* COOKAI_CHUNKEDCONNECTION_CONNECTIONACCEPTOR_H */

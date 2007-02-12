@@ -25,6 +25,8 @@
  * $Id$
  */
 
+#include "../config.h"
+
 #include <sys/types.h>
 #include <stdlib.h>
 
@@ -36,30 +38,37 @@
 namespace Cookai{
 namespace ChunkedConnection{
 
+    class ChunkedConnection;
+
     typedef enum {
 	EVENT_NOTHING,
 	EVENT_RECIVE_BLOCK,
 	EVENT_RECIVE_STREAM,
 	EVENT_ERROR_SOCKET_CLOSE,
+	EVENT_ACCEPT_NEW_SOCKET,
 	EVENT_ERROR_UNKNOWN,
     } EventType;
-    typedef bool (*ReadHandler)(EventType type, StaticBuffer *buf, int channel);
+    typedef bool (*ReadHandler)(EventType type, StaticBuffer *buf, int channel, Cookai::ChunkedConnection::ChunkedConnection *cc);
 
     class Event {
     private:
 	EventType type;
 	StaticBuffer *buf;
 	int channel;
+	Cookai::ChunkedConnection::ChunkedConnection *cc;
 	ReadHandler handler;
 
     public:
-	Event(EventType type, StaticBuffer *buf, int Channel = 0, ReadHandler Handler = NULL);
+	Event(EventType type, StaticBuffer *buf, Cookai::ChunkedConnection::ChunkedConnection *cc,
+	    int Channel = 0, ReadHandler Handler = NULL);
 	~Event(void);
 
 	void SetEventHandler(ReadHandler Handler);
+	void SetChunkedConnection(Cookai::ChunkedConnection::ChunkedConnection *cc);
 	EventType GetEventType(void);
 	StaticBuffer *GetBuffer(void);
 	int GetChannel(void);
+	Cookai::ChunkedConnection::ChunkedConnection *GetChunkedConnection(void);
 	bool Invoke(void);
     };
 };

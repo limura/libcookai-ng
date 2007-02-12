@@ -114,6 +114,11 @@ namespace ChunkedConnection {
     Connection::Connection(std::string name, std::string service, size_t newChunkSize){
 	Initialize((char *)name.c_str(), (char *)service.c_str(), newChunkSize);
     }
+    Connection::Connection(int acceptedFD, char *name, char *service, size_t newChunkSize){
+	Initialize(name, service, newChunkSize);
+	status = STATUS_CONNECTED;
+	fd = acceptedFD;
+    }
 
     Connection::~Connection(void){
 	if(remoteName != NULL)
@@ -130,6 +135,14 @@ namespace ChunkedConnection {
 	if(nbConnect != NULL)
 	    delete nbConnect;
 	thread_mutex_destroy(&writeBufferMutex);
+    }
+
+    char *Connection::GetRemoteName(void){
+	return remoteName;
+    }
+
+    char *Connection::GetRemoteService(void){
+	return remoteService;
     }
 
     bool Connection::IsConnect(){
@@ -272,7 +285,7 @@ Run_ChunkHeaderReadPart:
 		    StaticBuffer *tmpStreamBuffer = new StaticBuffer(header.length);
 		    if(tmpStreamBuffer == NULL)
 			goto Run_SocketError;
-		    streamEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_STREAM, tmpStreamBuffer, header.channel);
+		    streamEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_STREAM, tmpStreamBuffer, NULL, header.channel);
 		    if(streamEvent == NULL){
 			delete tmpStreamBuffer;
 			goto Run_SocketError;
@@ -286,7 +299,7 @@ Run_ChunkHeaderReadPart:
 			StaticBuffer *tmpBlockBuffer = new StaticBuffer(bufferLength);
 			if(tmpBlockBuffer == NULL)
 			    goto Run_SocketError;
-			blockEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_BLOCK, tmpBlockBuffer, header.channel);
+			blockEvent = new Event(Cookai::ChunkedConnection::EVENT_RECIVE_BLOCK, tmpBlockBuffer, NULL, header.channel);
 			if(blockEvent == NULL){
 			    delete tmpBlockBuffer;
 			    goto Run_SocketError;

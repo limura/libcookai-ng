@@ -60,6 +60,7 @@
 #define HAVE_BZERO
 #undef HAVE_IO_H
 #undef HAVE__READ
+#undef HAVE__SNPRINTF
 #define HAVE_POLL_H
 #define HAVE_POLL
 #define HAVE_SYS_SELECT_H
@@ -104,6 +105,7 @@
 #define HAVE_BZERO
 #undef HAVE_IO_H
 #undef HAVE__READ
+#undef HAVE__SNPRINTF
 
 #define HAVE_POLL_H
 #define HAVE_POLL
@@ -146,6 +148,7 @@
 #define HAVE_BZERO
 #undef HAVE_IO_H
 #undef HAVE__READ
+#undef HAVE__SNPRINTF
 #define HAVE_POLL_H
 #define HAVE_POLL
 #define HAVE_SYS_SELECT_H
@@ -188,6 +191,7 @@
 #define HAVE_BZERO
 #undef HAVE_IO_H
 #undef HAVE__READ
+#undef HAVE__SNPRINTF
 #define HAVE_POLL_H
 #define HAVE_POLL
 #define HAVE_SYS_SELECT_H
@@ -237,6 +241,7 @@
 #define HAVE_mciSendStringW
 #define HAVE_MMSYSTEM_H
 #define HAVE__READ
+#define HAVE__SNPRINTF
 #undef HAVE_POLL_H
 #undef HAVE_POLL
 #undef HAVE_SYS_SELECT_H
