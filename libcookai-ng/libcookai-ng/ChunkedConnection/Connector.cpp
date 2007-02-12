@@ -28,12 +28,14 @@
 #include "Connector.h"
 #include "ConnectionManager.h"
 #include "EventPool.h"
+#include "ConnectionAcceptor.h"
 
 namespace Cookai {
 namespace ChunkedConnection {
     Connector::Connector(void){
 	manager = new ConnectionManager();
 	eventPool = new EventPool();
+	manager->AddInterface(new Cookai::ChunkedConnection::ConnectionAcceptor(eventPool));
 	thread_create(&tid, (thread_func)LoopFunc, this);
     }
 

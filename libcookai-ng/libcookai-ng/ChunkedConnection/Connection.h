@@ -79,12 +79,16 @@ namespace ChunkedConnection {
     public:
 	Connection(char *name, char *service, size_t chunkSize = 1414);
 	Connection(std::string name, std::string service, size_t chunkSize = 1414);
+	Connection(int acceptedFD, char *name, char *service, size_t chunkSize = 1414);
 	~Connection(void);
 
 	bool Connect(void);
 	bool IsConnect(void);
 	void Disconnect(void);
 	int GetFD(void);
+
+	char *GetRemoteName(void);
+	char *GetRemoteService(void);
 
 	Cookai::ChunkedConnection::EventType Run(Event **eventReturn);
 	bool NonBlockWrite(unsigned char *buf, size_t length);

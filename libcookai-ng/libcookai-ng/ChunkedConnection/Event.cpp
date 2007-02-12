@@ -25,15 +25,19 @@
  * $Id$
  */
 
+#include "ChunkedConnection.h"
 #include "Event.h"
 
 namespace Cookai{
 namespace ChunkedConnection {
-    Event::Event(EventType Type, StaticBuffer *Buf, int Channel, ReadHandler Handler){
+    Event::Event(EventType Type, StaticBuffer *Buf,
+	Cookai::ChunkedConnection::ChunkedConnection *Cc,
+	int Channel, ReadHandler Handler){
 	type = Type;
 	buf = Buf;
 	channel = Channel;
 	handler = Handler;
+	cc = cc;
     }
 
     Event::~Event(void){
@@ -54,10 +58,16 @@ namespace ChunkedConnection {
     int Event::GetChannel(void){
 	return channel;
     }
+    Cookai::ChunkedConnection::ChunkedConnection *Event::GetChunkedConnection(void){
+	return cc;
+    }
+    void Event::SetChunkedConnection(Cookai::ChunkedConnection::ChunkedConnection *Cc){
+	cc = Cc;
+    }
 
     bool Event::Invoke(void){
 	if(handler != NULL){
-	    handler(type, buf, channel);
+	    handler(type, buf, channel, cc);
 	    return true;
 	}
 	return false;

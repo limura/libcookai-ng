@@ -88,6 +88,10 @@ namespace ChunkedConnection {
     ChunkedConnection::ChunkedConnection(std::string Name, std::string Service, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
 	Initialize((char *)Name.c_str(), (char *)Service.c_str(), Pool, ChunkSize);
     }
+    ChunkedConnection::ChunkedConnection(int acceptedFD, char *name, char *service, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
+	Initialize(name, service, Pool, ChunkSize);
+	connection = new Cookai::ChunkedConnection::Connection(acceptedFD, name, service, ChunkSize);
+    }
 
     ChunkedConnection::~ChunkedConnection(void)
     {
@@ -97,6 +101,16 @@ namespace ChunkedConnection {
 	    delete connection;
     }
 
+    char *ChunkedConnection::GetRemoteName(void){
+	if(connection != NULL)
+	    return connection->GetRemoteName();
+	return NULL;
+    }
+    char *ChunkedConnection::GetRemoteService(void){
+	if(connection != NULL)
+	    return connection->GetRemoteService();
+	return NULL;
+    }
 
     void ChunkedConnection::SetBlockReadHandler(ReadHandler handler){
 	blockReadHandler = handler;
@@ -179,18 +193,23 @@ namespace ChunkedConnection {
 			return true;
 			break;
 		    case Cookai::ChunkedConnection::EVENT_RECIVE_BLOCK:
-			if(ev != NULL && blockReadHandler != NULL)
+			if(ev != NULL && blockReadHandler != NULL){
 			    ev->SetEventHandler(blockReadHandler);
+			    ev->SetChunkedConnection(this);
+			}
 			break;
 		    case Cookai::ChunkedConnection::EVENT_RECIVE_STREAM:
-			if(ev != NULL && streamReadHandler != NULL)
+			if(ev != NULL && streamReadHandler != NULL){
 			    ev->SetEventHandler(streamReadHandler);
+			    ev->SetChunkedConnection(this);
+			}
 			break;
 		    case Cookai::ChunkedConnection::EVENT_ERROR_SOCKET_CLOSE:
 		    case Cookai::ChunkedConnection::EVENT_ERROR_UNKNOWN:
 			if(errorHandler != NULL)
-			    ev = new Event(eventType, NULL, 0, errorHandler);
+			    ev = new Event(eventType, NULL, this, 0, errorHandler);
 			break;
+		    case Cookai::ChunkedConnection::EVENT_ACCEPT_NEW_SOCKET:
 		    default:
 			return false;
 		    }
