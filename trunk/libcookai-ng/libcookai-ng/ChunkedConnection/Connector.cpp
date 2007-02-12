@@ -40,7 +40,7 @@ namespace ChunkedConnection {
     }
 
     Connector::~Connector(void){
-	thread_cancel(&tid);
+	thread_cancel(tid);
 	if(manager != NULL)
 	    delete manager;
 	if(eventPool != NULL)

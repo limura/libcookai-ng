@@ -27,6 +27,33 @@
 
 #include "NonBlockConnect.h"
 
+#include <errno.h>
+#include <sys/types.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#include <fcntl.h>
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+#include <errno.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
+
 namespace Cookai{
 namespace ChunkedConnection {
     NonBlockConnect::NonBlockConnect(void){
@@ -77,15 +104,15 @@ namespace ChunkedConnection {
 #endif
 	    ret = connect(fd, res->ai_addr, (int)res->ai_addrlen);
 	    if(ret < 0){
-		if(
+		if(0
 #ifdef EWOULDBLOCK
-		    errno == EWOULDBLOCK
+		   || errno == EWOULDBLOCK
 #endif
 #ifdef HAVE_WSAGETLASTERROR
-		    WSAGetLastError() == WSAEWOULDBLOCK
+		   || WSAGetLastError() == WSAEWOULDBLOCK
 #endif
 #ifdef EAGAIN
-		    errno == EAGAIN
+		   || errno == EAGAIN
 #endif
 		    ){
 			*fd_return = fd;
