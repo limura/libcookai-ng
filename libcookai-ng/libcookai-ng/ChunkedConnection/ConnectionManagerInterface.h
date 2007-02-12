@@ -42,6 +42,8 @@ class ConnectionManager;
 
     class ConnectionManagerInterface {
     public:
+	virtual ~ConnectionManagerInterface(void);
+
 	virtual int Connect(void) = 0;
 	virtual void RegisterConnectionManager(Cookai::ChunkedConnection::ConnectionManager *cm) = 0;
 	virtual bool Run(Cookai::ChunkedConnection::ConnectionStatus status) = 0;
@@ -50,3 +52,4 @@ class ConnectionManager;
 };
 
 #endif /* COOKAI_CHUNKEDCONNECTION_CONNECTIONMANAGERINTARFACE_H */
+

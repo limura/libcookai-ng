@@ -202,13 +202,14 @@ namespace ChunkedConnection {
 #ifdef HAVE_POLL
 	if(pollfds == NULL)
 	    return true;
+	int pollRet = -1;
 	if(usec > 0)
-	int pollRet = poll(pollfds, nfds, usec * 1000);
+	    pollRet = poll(pollfds, nfds, usec * 1000);
 	if(pollRet < 0)
 	    return false;
 	if(pollRet == 0)
 	    return true;
-	for(int i; pollRet > 0 i < nfds; i++){
+	for(int i = 0; pollRet > 0 && i < nfds; i++){
 	    int status = 0;
 	    if(pollfds[i].revents & POLLRDNORM)
 		status = status | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK;

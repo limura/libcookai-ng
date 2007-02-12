@@ -79,3 +79,4 @@ namespace ChunkedConnection {
 };
 
 #endif /* COOKAI_NONBLOCKCONNECT_H */
+

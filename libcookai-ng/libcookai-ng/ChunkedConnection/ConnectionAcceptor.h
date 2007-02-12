@@ -58,3 +58,4 @@ namespace ChunkedConnection {
 };
 
 #endif /* COOKAI_CHUNKEDCONNECTION_CONNECTIONACCEPTOR_H */
+

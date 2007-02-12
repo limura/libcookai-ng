@@ -45,7 +45,6 @@ namespace ChunkedConnection {
     }
 
     StaticBuffer *ChunkedConnection::CreateNewBuffer(void){
-	uint16_t dummy = 0;
 	StaticBuffer *buf = new StaticBuffer(chunkSize);
 	if(buf == NULL)
 	    return NULL;
@@ -53,7 +52,7 @@ namespace ChunkedConnection {
 	return buf;
     }
     void ChunkedConnection::WriteHeader(int nextChunkNum, int channel, uint16_t length, StaticBuffer *buf){
-	if(buf = NULL)
+	if(buf == NULL)
 	    return;
 	size_t writePos = buf->GetDataLength();
 	buf->WriteSeek(0);
@@ -161,7 +160,7 @@ namespace ChunkedConnection {
 	while(!writeQueue->empty()){
 	    StaticBuffer *buf = writeQueue->front();
 	    WriteHeader(num, channel, (uint16_t)buf->GetDataLength(), buf);
-	    connection->NonBlockWrite(buf); // connection‚ª StaticBuffer ‚ð delete ‚·‚é
+	    connection->NonBlockWrite(buf); // connection$B".".(B StaticBuffer $B".".(B delete $B".".".".(B
 	    writeQueue->pop_front();
 	    num--;
 	}

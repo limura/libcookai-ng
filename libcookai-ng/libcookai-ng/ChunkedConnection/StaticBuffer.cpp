@@ -27,6 +27,7 @@
 
 #include "../config.h"
 
+#include <errno.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -116,15 +117,15 @@ int StaticBuffer::ReadFromSocket(int fd, size_t *readSize){
 #endif
     int length = recv(fd, (char *)&buf[writePos], (int)*readSize, 0);
     if(length < 0){ // error
-	if(
+	if(0
 #ifdef EWOULDBLOCK
-	    errno == EWOULDBLOCK
+	   || errno == EWOULDBLOCK
 #endif
 #ifdef HAVE_WSAGETLASTERROR
-	    WSAGetLastError() == WSAEWOULDBLOCK
+	   || WSAGetLastError() == WSAEWOULDBLOCK
 #endif
 #ifdef EAGAIN
-	    errno == EAGAIN
+	   || errno == EAGAIN
 #endif
 	    ){
 		return 1;
@@ -161,15 +162,15 @@ int StaticBuffer::WriteToSocket(int fd){
 #endif
     int length = send(fd, (char *)&buf[readPos], (int)(size - readPos), 0);
     if(length < 0){
-	if(
+	if(0
 #ifdef EWOULDBLOCK
-	    errno == EWOULDBLOCK
+	   || errno == EWOULDBLOCK
 #endif
 #ifdef HAVE_WSAGETLASTERROR
-	    WSAGetLastError() == WSAEWOULDBLOCK
+	   || WSAGetLastError() == WSAEWOULDBLOCK
 #endif
 #ifdef EAGAIN
-	    errno == EAGAIN
+	   || errno == EAGAIN
 #endif
 	    ){
 	    return 1;
