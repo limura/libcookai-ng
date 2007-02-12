@@ -60,6 +60,10 @@
 #define HAVE_BZERO
 #undef HAVE_IO_H
 #undef HAVE__READ
+#define HAVE_POLL_H
+#define HAVE_POLL
+#define HAVE_SYS_SELECT_H
+#define HAVE_SELECT
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -101,6 +105,11 @@
 #undef HAVE_IO_H
 #undef HAVE__READ
 
+#define HAVE_POLL_H
+#define HAVE_POLL
+#define HAVE_SYS_SELECT_H
+#define HAVE_SELECT
+
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
 #define HAVE_PTHREAD_H
@@ -137,6 +146,10 @@
 #define HAVE_BZERO
 #undef HAVE_IO_H
 #undef HAVE__READ
+#define HAVE_POLL_H
+#define HAVE_POLL
+#define HAVE_SYS_SELECT_H
+#define HAVE_SELECT
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -175,6 +188,10 @@
 #define HAVE_BZERO
 #undef HAVE_IO_H
 #undef HAVE__READ
+#define HAVE_POLL_H
+#define HAVE_POLL
+#define HAVE_SYS_SELECT_H
+#define HAVE_SELECT
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -220,6 +237,10 @@
 #define HAVE_mciSendStringW
 #define HAVE_MMSYSTEM_H
 #define HAVE__READ
+#undef HAVE_POLL_H
+#undef HAVE_POLL
+#undef HAVE_SYS_SELECT_H
+#define HAVE_SELECT
 
 #define USE_THREAD
 #define HAVE_WINDOWS_H

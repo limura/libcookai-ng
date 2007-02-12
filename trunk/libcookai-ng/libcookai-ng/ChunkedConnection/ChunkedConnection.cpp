@@ -41,6 +41,7 @@ namespace ChunkedConnection {
 	connection = new Cookai::ChunkedConnection::Connection(Name, Service);
 	chunkSize = ChunkSize;
 	channelWriteQueue.clear();
+	connectionManager = NULL;
     }
 
     StaticBuffer *ChunkedConnection::CreateNewBuffer(void){
@@ -97,13 +98,13 @@ namespace ChunkedConnection {
     }
 
 
-    void ChunkedConnection::SetBlockReadHandler(chunkReadHandler handler){
+    void ChunkedConnection::SetBlockReadHandler(ReadHandler handler){
 	blockReadHandler = handler;
-	}
-    void ChunkedConnection::SetStreamReadHandler(chunkReadHandler handler){
+    }
+    void ChunkedConnection::SetStreamReadHandler(ReadHandler handler){
 	streamReadHandler = handler;
     }
-    void ChunkedConnection::SetErrorHandler(chunkErrorHandler handler){
+    void ChunkedConnection::SetErrorHandler(ReadHandler handler){
 	errorHandler = handler;
     }
 
@@ -164,11 +165,59 @@ namespace ChunkedConnection {
 	return true;
     }
 
-    bool ChunkedConnection::RunThread(void){
+    void ChunkedConnection::RegisterConnectionManager(ConnectionManager *cm){
+	connectionManager = cm;
     }
-    int ChunkedConnection::ProcessBuffer(void){ // thread ‚ª“®‚¢‚Ä‚½‚ç ProcessBuffer() ‚Í EventPool ‚Ìˆ—‚ð‚·‚é‚¾‚¯Bthread ‚ª“®‚¢‚Ä‚¢‚È‚¯‚ê‚ÎAsend(2) ‚à‚·‚éB
+    bool ChunkedConnection::Run(Cookai::ChunkedConnection::ConnectionStatus status){
+	if(status != Cookai::ChunkedConnection::CONNECTION_STATUS_NONE){
+	    Cookai::ChunkedConnection::EventType eventType;
+	    Cookai::ChunkedConnection::Event *ev;
+	    if(connection->IsConnect()){
+		while(1){
+		    switch(eventType = connection->Run(&ev)){
+		    case Cookai::ChunkedConnection::EVENT_NOTHING:
+			return true;
+			break;
+		    case Cookai::ChunkedConnection::EVENT_RECIVE_BLOCK:
+			if(ev != NULL && blockReadHandler != NULL)
+			    ev->SetEventHandler(blockReadHandler);
+			break;
+		    case Cookai::ChunkedConnection::EVENT_RECIVE_STREAM:
+			if(ev != NULL && streamReadHandler != NULL)
+			    ev->SetEventHandler(streamReadHandler);
+			break;
+		    case Cookai::ChunkedConnection::EVENT_ERROR_SOCKET_CLOSE:
+		    case Cookai::ChunkedConnection::EVENT_ERROR_UNKNOWN:
+			if(errorHandler != NULL)
+			    ev = new Event(eventType, NULL, 0, errorHandler);
+			break;
+		    default:
+			return false;
+		    }
+		    if(ev != NULL)
+			eventPool->AddEvent(ev);
+		}
+	    }else{
+		Connect();
+	    }
+	}
+	return true;
     }
 
+    int ChunkedConnection::Connect(void){
+	if(connection == NULL)
+	    return -1;
+	if(connection->IsConnect())
+	    return connection->GetFD();
 
+	connection->Connect();
+	int fd = connection->GetFD();
+	if(fd < 0)
+	    return -1;
+
+	if(connectionManager != NULL)
+	    connectionManager->UpdateSelectStatus(this, fd, Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
+	return fd;
+    }
 };
 }; /* namespace Cookai */

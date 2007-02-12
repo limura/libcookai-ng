@@ -333,6 +333,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ChunkedConnection\ConnectionManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\Connector.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\ChunkedConnection\Event.cpp"
 					>
 					<FileConfiguration
@@ -502,6 +510,18 @@
 				</File>
 				<File
 					RelativePath=".\ChunkedConnection\Connection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\ConnectionManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\ConnectionManagerInterface.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChunkedConnection\Connector.h"
 					>
 				</File>
 				<File

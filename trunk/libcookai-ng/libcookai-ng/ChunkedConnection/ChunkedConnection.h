@@ -38,28 +38,24 @@
 #include "Connection.h"
 #include "Event.h"
 #include "EventPool.h"
+#include "ConnectionManager.h"
+#include "ConnectionManagerInterface.h"
 
 namespace Cookai {
 namespace ChunkedConnection {
 
 #define CHUNKED_CONNECTION_MAX_CHANNEL (256) /* unsigned char */
 
-    typedef enum {
-	CONNECTION_CLOSE,
-	UNKNOWN_ERROR,
-    } ErrorType;
-    typedef void (*chunkReadHandler)(Cookai::ChunkedConnection::ErrorType type);
-    typedef void (*chunkErrorHandler)(Cookai::ChunkedConnection::ErrorType type);
-
-    class ChunkedConnection{
+    class ChunkedConnection : public ConnectionManagerInterface {
     private:
 	bool threadEnable;
 	threadID readThreadID;
-	chunkReadHandler blockReadHandler;
-	chunkReadHandler streamReadHandler;
-	chunkErrorHandler errorHandler;
+	ReadHandler blockReadHandler;
+	ReadHandler streamReadHandler;
+	ReadHandler errorHandler;
 	size_t chunkSize;
 	Connection *connection;
+	ConnectionManager *connectionManager;
 
 	typedef std::list<StaticBuffer *> WriteQueue;
 	typedef std::map<int, WriteQueue *> ChannelWriteQueue;
@@ -70,22 +66,24 @@ namespace ChunkedConnection {
 	StaticBuffer *CreateNewBuffer(void);
 	WriteQueue *GetWriteQueue(int channel);
 	void WriteHeader(int nextChunkNum, int channel, uint16_t length, StaticBuffer *buf);
+	void Run(Connection *targetConnection);
 
     public:
 	ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
 	ChunkedConnection(std::string name, std::string service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
 	~ChunkedConnection(void);
 
-	void SetBlockReadHandler(chunkReadHandler handler);
-	void SetStreamReadHandler(chunkReadHandler handler);
-	void SetErrorHandler(chunkErrorHandler handler);
+	void SetBlockReadHandler(ReadHandler handler);
+	void SetStreamReadHandler(ReadHandler handler);
+	void SetErrorHandler(ReadHandler handler);
 
 	bool BlockWrite(unsigned char *buf, size_t length, int channel = 0);
 	bool BlockCommit(int channel = 0);
 	bool StreamWrite(unsigned char *buf, size_t length, int channel = 0);
 
-	bool RunThread(void);
-	int ProcessBuffer(void); // thread Ç™ìÆÇ¢ÇƒÇΩÇÁ ProcessBuffer() ÇÕ EventPool ÇÃèàóùÇÇ∑ÇÈÇæÇØÅBthread Ç™ìÆÇ¢ÇƒÇ¢Ç»ÇØÇÍÇŒÅAsend(2) Ç‡Ç∑ÇÈÅB
+	int Connect(void);
+	void RegisterConnectionManager(ConnectionManager *cm);
+	bool Run(Cookai::ChunkedConnection::ConnectionStatus status);
     };
 
 }; /* namespace ChunkedConnection */

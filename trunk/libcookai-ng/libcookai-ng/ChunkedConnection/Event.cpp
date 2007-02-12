@@ -37,8 +37,12 @@ namespace ChunkedConnection {
     }
 
     Event::~Event(void){
-	if(data != NULL)
-	    free(data);
+	if(buf != NULL)
+	    delete buf;
+    }
+
+    void Event::SetEventHandler(ReadHandler Handler){
+	handler = Handler;
     }
 
     EventType Event::GetEventType(void){

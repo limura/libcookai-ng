@@ -159,7 +159,7 @@ char *upnp_discover(char *ST){
 	dest.sin_port = htons(1900);
 	dest.sin_family = AF_INET;
 
-	if(sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0)
+	if(sendto(sock, buf, qstrlen(buf), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0)
 		return NULL;
 	{ /* ‚È‚º‚¾‚©‚í‚©‚ç‚ñ‚ª bloadcast address(‚Ü‚½‚ÍIGD‚ÌIP addr) ‚É“Š‚°‚Ä‚â‚ç‚È‚¢‚Æ IGD ‚ª”½‰ž‚µ‚Ä‚­‚ê‚È‚¢‚±‚Æ‚ª‚ ‚éB
 	     IGD‚ÌIPaddr‚ð“¾‚é‚Ì‚Í’Êí–³—‚È‚Ì‚ÅA‚Æ‚è‚ ‚¦‚¸ bloadcast address ‚Å‰ä–B
@@ -705,7 +705,7 @@ cookai_upnp *upnp_listen_stream(int targetPort){
 		return NULL;
 	}
 	free(ret);
-	i = strlen(BaseUrl);
+	i = (int)strlen(BaseUrl);
 	if(ControlUrl[0] == '/' && BaseUrl[i - 1] == '/')
 		BaseUrl[--i] = '\0';
 	if(i + strlen(ControlUrl) + 1 > sizeof(BaseUrl)){
