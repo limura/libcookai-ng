@@ -102,7 +102,7 @@ namespace ChunkedConnection {
 	    int ret;
 	    errno = 0;
 #ifdef HAVE_WSAGETLASTERROR
-    WSASetLastError(0);
+	    WSASetLastError(0);
 #endif
 	    ret = connect(fd, res->ai_addr, (int)res->ai_addrlen);
 	    if(ret < 0){
@@ -139,14 +139,14 @@ namespace ChunkedConnection {
 #endif
 		status = FAILED;
 #ifdef DEBUG
-		// error list http://homepage1.nifty.com/yito/anhttpd/winsock_error.html
 #ifdef HAVE_WSAGETLASTERROR
+		// error list http://homepage1.nifty.com/yito/anhttpd/winsock_error.html
 		int err = WSAGetLastError();
 #else
 		int err = errno;
-#endif
+#endif /* HAVE_WSAGETLASTERROR */
 		DPRINTF(10, ("err: %d\r\n", err));
-#endif
+#endif /* DEBUG */
 		fd = -1;
 		return Run(fd_return);
 	    }
