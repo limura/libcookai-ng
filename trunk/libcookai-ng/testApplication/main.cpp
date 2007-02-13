@@ -161,6 +161,7 @@ int main(int argc, char *argv[]){
 	snprintf(buf, sizeof(buf), "Message No: %d", n);
 #endif
 	DPRINTF(10, ("write message '%s'\r\n", buf));
+	n++;
 	cc->BlockWrite((unsigned char *)buf, strlen(buf) + 1);
 	cc->BlockCommit();
 	c1->InvokeAllEvent();

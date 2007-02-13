@@ -107,7 +107,7 @@ int thread_mutex_init(thread_mutex *mutex, char *name){
 
 int thread_mutex_lock(thread_mutex *mutex){
 #ifdef HAVE_PTHREAD_H
-    DPRINTF(10, ("thread_mutex_lock(%p)\n", mutex));
+    //DPRINTF(10, ("thread_mutex_lock(%p)\n", mutex));
     if(pthread_mutex_lock((pthread_mutex_t *)mutex) == 0)
 	return TRUE;
 #else defined(HAVE_WINDOWS_H)
@@ -123,7 +123,7 @@ int thread_mutex_lock(thread_mutex *mutex){
 
 int thread_mutex_unlock(thread_mutex *mutex){
 #ifdef HAVE_PTHREAD_H
-    DPRINTF(10, ("thread_mutex_unlock(%p)\n", mutex));
+    //DPRINTF(10, ("thread_mutex_unlock(%p)\n", mutex));
     if(pthread_mutex_unlock((pthread_mutex_t *)mutex) == 0)
 	return TRUE;
 #else defined(HAVE_WINDOWS_H)
