@@ -63,14 +63,30 @@ namespace ChunkedConnection {
 	res = NULL;
 	res0 = NULL;
 	status = NOT_INITIALIZED;
+	remoteName = NULL;
+	remoteService = NULL;
     }
  
     NonBlockConnect::~NonBlockConnect(void){
 	if(res0 != NULL)
 	    freeaddrinfo(res0);
+	if(remoteName != NULL)
+	    free(remoteName);
+	if(remoteService != NULL)
+	    free(remoteService);
     }
 
-    bool NonBlockConnect::SetTarget(char *name, char *service){
+    bool NonBlockConnect::LookupIPPort(char *name, char *service, char *newNameBuf, char *newServiceBuf){
+	if(name == NULL || service == NULL || newNameBuf == NULL || newServiceBuf == NULL)
+	    return false;
+	*newNameBuf = *newServiceBuf = '\0';
+	/* now use DNS or IP addr */
+	strcpy(newNameBuf, name);
+	strcpy(newServiceBuf, service);
+	return true;
+    }
+
+    bool NonBlockConnect::LookupTarget(void){
 	hints.ai_family = PF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = 0;
@@ -81,14 +97,32 @@ namespace ChunkedConnection {
 	hints.ai_next = NULL;
 	if(res0 != NULL)
 	    freeaddrinfo(res0);
+	char nameBuf[1024];
+	char serviceBuf[1024];
 
-	if(getaddrinfo(name, service, &hints, &res0)){
+	LookupIPPort(remoteName, remoteService, nameBuf, serviceBuf);
+
+	DPRINTF(10, ("resolving for connect %s:%s\r\n", remoteName, remoteService));
+
+	if(getaddrinfo(nameBuf, serviceBuf, &hints, &res0)){
 	    status = NOT_INITIALIZED;
 	    return false;
 	}
 	status = INITIALIZED;
 	res = NULL;
 	return true;
+    }
+
+    bool NonBlockConnect::SetTarget(char *name, char *service){
+	remoteName = strdup(name);
+	if(remoteName == NULL)
+	    return false;
+	remoteService = strdup(service);
+	if(remoteService == NULL){
+	    free(remoteName);
+	    return false;
+	}
+	return LookupTarget();
     }
 
     NonBlockConnect::ConnectionStatus NonBlockConnect::Run(int *fd_return){
@@ -167,6 +201,7 @@ namespace ChunkedConnection {
 	    if(res == NULL){
 		freeaddrinfo(res0);
 		res0 = NULL;
+		LookupTarget();
 		return FAILED;
 	    }
 	}
@@ -176,6 +211,7 @@ namespace ChunkedConnection {
 #else
 	fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 #endif
+	DPRINTF(10, ("Creating socket for connect %d\r\n", fd));
 #ifdef HAVE_FCNTL
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 #endif

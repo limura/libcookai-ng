@@ -130,6 +130,7 @@ int StaticBuffer::ReadFromSocket(int fd, size_t *readSize){
 	   || errno == EAGAIN
 #endif
 	    ){
+		DPRINTF(10, ("  reciv FD:%d WOULDBLOCK\r\n", fd));
 		return 1;
 	}
 #ifdef HAVE_WSAGETLASTERROR

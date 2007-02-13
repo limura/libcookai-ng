@@ -64,22 +64,6 @@
 namespace Cookai {
 namespace ChunkedConnection {
 
-    bool Connection::LookupIPPort(char *name, char *service, char **newName, char **newService){
-	if(name == NULL || service == NULL || newName == NULL || newService == NULL)
-	    return false;
-	*newName = *newService = NULL;
-	/* now use DNS or IP addr */
-	*newName = strdup(name);
-	if(*newName == NULL)
-	    return false;
-	*newService = strdup(service);
-	if(*newService == NULL){
-	    free(*newName);
-	    return false;
-	}
-	return true;
-    }
-
     bool Connection::Handshake(void){
 	if(fd < 0)
 	    return false;
@@ -184,15 +168,10 @@ namespace ChunkedConnection {
 		nbConnect = new NonBlockConnect();
 		if(nbConnect == NULL)
 		    return false;
-		{
-		    char *name, *service;
-		    if(LookupIPPort(remoteName, remoteService, &name, &service) != true)
-			return false;
-		    if(nbConnect->SetTarget(remoteName, remoteService) != true){
-			free(name); free(service);
-			return false;
-		    }
-		    free(name); free(service);
+		if(nbConnect->SetTarget(remoteName, remoteService) == false){
+		    delete nbConnect;
+		    nbConnect = NULL;
+		    return false;
 		}
 	    }
 	    switch(nbConnect->Run(&fd)){
