@@ -379,7 +379,7 @@ char *buf2str(char *p, size_t siz, int bank){
 	int i;
 	pp = buf[bank];
 	for(i = 0; i < (int)siz; i++){
-	    if(isprint(*p)){
+	    if(isprint((int)*p)){
 		*pp = *p;
 	    }else{
 		*pp = '.';

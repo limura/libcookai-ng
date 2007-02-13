@@ -29,6 +29,7 @@
 
 #include "NonBlockConnect.h"
 
+#include <string.h>
 #include <errno.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_TIME_H
