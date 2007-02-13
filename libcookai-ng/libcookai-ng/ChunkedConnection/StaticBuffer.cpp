@@ -27,6 +27,7 @@
 
 #include "../config.h"
 
+#include <stdio.h>
 #include <errno.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -197,11 +198,11 @@ bool StaticBuffer::ReadSeek(size_t newPosition){
     return true;
 }
 
-bool StaticBuffer::Write(unsigned char *buf, size_t dataSize){
+bool StaticBuffer::Write(unsigned char *WriteBuf, size_t dataSize){
     if(dataSize > size - writePos)
 	return false;
 
-    memcpy(&buf[writePos], buf, dataSize);
+    memcpy(&buf[writePos], WriteBuf, dataSize);
     writePos += dataSize;
     return true;
 }

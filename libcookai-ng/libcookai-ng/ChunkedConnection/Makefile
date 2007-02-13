@@ -40,7 +40,7 @@ CFLAGS += -DDEBUG #-pg
 
 CFLAGS += -DBENCHMARK
 
-LOPTIONS += -pg -g
+LOPTIONS += -pg -g -lpthread
 #LOPTIONS += -lsocket -lnsl # for Soraris
 #LOPTIONS += -lmd # for FreeBSD
 #LOPTIONS += -lssl -lcrypto # for openssl/sha.h systems (e.g. MacOS X)
@@ -51,11 +51,17 @@ LOPTIONS += -pg -g
 .cpp.o:
 	$(CPP) -c $(CFLAGS) $(INCLUDES) $< -o $@
 
-all:	$(TARGET)
+all:	$(TARGET) serv client
 
 libChunkedConnection.a:	$(OBJS)
 	$(AR) rc $@ $(OBJS)
 	$(RANLIB) $@
+
+serv:	libChunkedConnection.a hoge.o
+	$(CPP) -o $@ hoge.o $(LOPTIONS) -L../tools -L. -lChunkedConnection -lCookaiTools
+
+client:	libChunkedConnection.a client.o
+	$(CPP) -o $@ client.o $(LOPTIONS) -L../tools -L. -lChunkedConnection -lCookaiTools
 
 clean:	
 	rm -f $(TARGET) *.core $(OBJS)

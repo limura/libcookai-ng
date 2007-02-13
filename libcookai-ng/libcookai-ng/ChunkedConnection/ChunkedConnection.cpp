@@ -123,7 +123,6 @@ namespace ChunkedConnection {
 
     bool ChunkedConnection::BlockWrite(unsigned char *buf, size_t length, int channel){
 	WriteQueue *writeQueue = NULL;
-
 	writeQueue = GetWriteQueue(channel);
 	if(writeQueue == NULL)
 	    return false;

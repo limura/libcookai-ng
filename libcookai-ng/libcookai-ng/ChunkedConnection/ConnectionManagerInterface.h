@@ -42,7 +42,7 @@ class ConnectionManager;
 
     class ConnectionManagerInterface {
     public:
-	virtual ~ConnectionManagerInterface(void);
+	//virtual ~ConnectionManagerInterface(void);
 
 	virtual int Connect(void) = 0;
 	virtual void RegisterConnectionManager(Cookai::ChunkedConnection::ConnectionManager *cm) = 0;

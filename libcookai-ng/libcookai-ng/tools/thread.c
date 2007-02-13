@@ -73,7 +73,7 @@ int thread_create(threadID *id, thread_func func, void *userdata){
     return FALSE;
 }
 
-int thraed_cancel(threadID id){
+int thread_cancel(threadID id){
 #ifdef HAVE_PTHREAD_H
     if(pthread_cancel((pthread_t)id) == 0)
 	return TRUE;
