@@ -60,6 +60,9 @@ namespace ChunkedConnection {
     private:
 	int fd;
 	struct addrinfo hints, *res, *res0;
+	char *remoteName, *remoteService;
+	bool LookupTarget(void);
+	bool LookupIPPort(char *name, char *service, char *nameReturn, char *serviceReturn);
     public:
 	typedef enum {
 	    TRYING,

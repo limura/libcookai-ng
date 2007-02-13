@@ -71,7 +71,6 @@ namespace ChunkedConnection {
 	size_t blockChunkLength;
 	int nowChunkNum;
 
-	bool LookupIPPort(char *name, char *service, char **newName, char **newService);
 	bool Initialize(char *name, char *service, size_t newChunkSize);
 	bool Handshake(void);
 	bool Read(void);
