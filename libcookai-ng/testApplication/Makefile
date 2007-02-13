@@ -26,21 +26,20 @@ CPP = g++
 AR = ar
 RANLIB = ranlib
 
-SRCS = ChunkedConnection.cpp ConnectionManager.cpp EventPool.cpp
-SRCS += Connection.cpp Connector.cpp NonBlockConnect.cpp
-SRCS += ConnectionAcceptor.cpp Event.cpp StaticBuffer.cpp
+SRCS = main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
-TARGET = libChunkedConnection.a
+TARGET = test
 
 CFLAGS = -g -O -Wall -Wuninitialized -I.
+CFLAGS += -I../libcookai-ng
 CFLAGS += -DNSNS_NONBLOCK
 CFLAGS += -DUSE_REUSEADDR
 CFLAGS += -DDEBUG #-pg
 
 CFLAGS += -DBENCHMARK
 
-LOPTIONS += -pg -g -lpthread
+LOPTIONS += -pg -g -lpthread -L../libcookai-ng/tools -L../libcookai-ng/ChunkedConnection -lChunkedConnection -lCookaiTools
 #LOPTIONS += -lsocket -lnsl # for Soraris
 #LOPTIONS += -lmd # for FreeBSD
 #LOPTIONS += -lssl -lcrypto # for openssl/sha.h systems (e.g. MacOS X)
@@ -53,9 +52,8 @@ LOPTIONS += -pg -g -lpthread
 
 all:	$(TARGET)
 
-libChunkedConnection.a:	$(OBJS)
-	$(AR) rc $@ $(OBJS)
-	$(RANLIB) $@
+test:	main.o
+	$(CPP) -o $@ main.o $(LOPTIONS)
 
 clean:	
 	rm -f $(TARGET) *.core $(OBJS)

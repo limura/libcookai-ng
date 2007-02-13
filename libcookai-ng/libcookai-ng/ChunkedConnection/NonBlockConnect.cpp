@@ -140,7 +140,11 @@ namespace ChunkedConnection {
 		status = FAILED;
 #ifdef DEBUG
 		// error list http://homepage1.nifty.com/yito/anhttpd/winsock_error.html
+#ifdef HAVE_WSAGETLASTERROR
 		int err = WSAGetLastError();
+#else
+		int err = errno;
+#endif
 		DPRINTF(10, ("err: %d\r\n", err));
 #endif
 		fd = -1;
