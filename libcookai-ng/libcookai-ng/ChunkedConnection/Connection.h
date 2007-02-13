@@ -54,7 +54,7 @@ namespace ChunkedConnection {
 	typedef enum {
 	    STATUS_CONNECTING,
 	    STATUS_CONNECTED,
-	    STATUS_DISOCNNECTED,
+	    STATUS_DISCONNECTED,
 	} ConnectionStatus;
 	ConnectionStatus status;
 	int fd;
@@ -86,6 +86,7 @@ namespace ChunkedConnection {
 	bool IsConnect(void);
 	void Disconnect(void);
 	int GetFD(void);
+	bool WriteQueueEmpty(void);
 
 	char *GetRemoteName(void);
 	char *GetRemoteService(void);

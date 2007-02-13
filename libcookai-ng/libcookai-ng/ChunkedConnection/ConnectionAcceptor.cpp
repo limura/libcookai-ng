@@ -44,16 +44,18 @@
 #include <windows.h>
 #endif
 
+#include "Connector.h"
 #include "ConnectionAcceptor.h"
 #include "ChunkedConnection.h"
 
 namespace Cookai {
 namespace ChunkedConnection {
 
-    ConnectionAcceptor::ConnectionAcceptor(EventPool *ep){
+    ConnectionAcceptor::ConnectionAcceptor(EventPool *ep, ReadHandler AcceptEventHandler){
 	acceptSocketFD = -1;
 	connectionManager = NULL;
 	eventPool = ep;
+	acceptEventHandler = AcceptEventHandler;
     }
 
     ConnectionAcceptor::~ConnectionAcceptor(void){
@@ -112,12 +114,14 @@ namespace ChunkedConnection {
 		    shutdown(acceptedSocket, SHUT_RDWR);
 		    close(acceptedSocket);
 #endif
+		    return false;
 		    break;
 		}
 		ChunkedConnection *cc = new Cookai::ChunkedConnection::ChunkedConnection(acceptedSocket, nameBuf, serviceBuf, eventPool);
 		if(cc == NULL)
 		    return false;
-		Cookai::ChunkedConnection::Event *ev = new Cookai::ChunkedConnection::Event(Cookai::ChunkedConnection::EVENT_ACCEPT_NEW_SOCKET, NULL, cc);
+		Cookai::ChunkedConnection::Event *ev = new Cookai::ChunkedConnection::Event(Cookai::ChunkedConnection::EVENT_ACCEPT_NEW_SOCKET,
+		    NULL, cc, 0, acceptEventHandler);
 		if(ev == NULL)
 		    return false;
 		if(eventPool != NULL)

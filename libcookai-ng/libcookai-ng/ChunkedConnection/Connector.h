@@ -38,6 +38,9 @@
 
 namespace Cookai {
 namespace ChunkedConnection {
+
+#define COOKAI_DEFAULT_ACCEPT_PORT "1203"
+
     class Connector {
     private:
 	ConnectionManager *manager;
@@ -49,7 +52,7 @@ namespace ChunkedConnection {
 	void RunTick(int usec);
 
     public:
-	Connector(void);
+	Connector(ReadHandler AcceptEventHandler, char *serviceName = COOKAI_DEFAULT_ACCEPT_PORT);
 	~Connector(void);
 
 	ChunkedConnection *Connect(char *name, char *service,
