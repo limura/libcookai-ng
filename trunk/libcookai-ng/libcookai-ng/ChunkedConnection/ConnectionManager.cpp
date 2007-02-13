@@ -185,11 +185,11 @@ namespace ChunkedConnection {
     }
 
     void ConnectionManager::Invoke(int fd, Cookai::ChunkedConnection::ConnectionStatus status){
-	if(fd < 0 || status == 0)
+	if(fd < 0 || status == 0 || connectionStatusMap.empty())
 	    return;
 	ManagerInterface *mi = NULL;
 	for(ConnectionStatusMap::iterator i = connectionStatusMap.begin(); i != connectionStatusMap.end(); i++){
-	    if(i->second->fd == fd){
+	    if(i->second != NULL && i->second->fd == fd){
 		mi = i->second;
 		break;
 	    }
