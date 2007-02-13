@@ -36,7 +36,7 @@ TARGET = libChunkedConnection.a
 CFLAGS = -g -O -Wall -Wuninitialized -I.
 CFLAGS += -DNSNS_NONBLOCK
 CFLAGS += -DUSE_REUSEADDR
-CFLAGS += -DDEBUG #-pg
+CFLAGS += -DDEBUG -pg
 
 CFLAGS += -DBENCHMARK
 

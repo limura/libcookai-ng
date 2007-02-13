@@ -39,3 +39,4 @@ int cdopen(void);
 #endif /* __cplusplus */
 
 #endif COOKAI_CDOPEN_H
+

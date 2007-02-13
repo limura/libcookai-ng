@@ -35,7 +35,7 @@ CFLAGS = -g -O -Wall -Wuninitialized -I.
 CFLAGS += -I../libcookai-ng
 CFLAGS += -DNSNS_NONBLOCK
 CFLAGS += -DUSE_REUSEADDR
-CFLAGS += -DDEBUG #-pg
+CFLAGS += -DDEBUG -pg
 
 CFLAGS += -DBENCHMARK
 
