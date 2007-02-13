@@ -73,7 +73,7 @@ namespace ChunkedConnection {
 	    mi->fd = -1;
 	    mi->Interface = Interface;
 	    mi->status = Cookai::ChunkedConnection::CONNECTION_STATUS_NONE;
-	    connectionStatusMap.insert(ConnectionStatusMap::value_type(Interface, mi));
+	    connectionStatusMap[Interface] = mi;
 	}
 	return mi;
     }
@@ -200,8 +200,10 @@ namespace ChunkedConnection {
 
     bool ConnectionManager::Run(int usec){
 #ifdef HAVE_POLL
-	if(pollfds == NULL)
+	if(pollfds == NULL){
+	    usleep(usec);
 	    return true;
+	}
 	int pollRet = -1;
 	if(usec > 0)
 	    pollRet = poll(pollfds, nfds, usec * 1000);
@@ -223,12 +225,16 @@ namespace ChunkedConnection {
 	return true;
 #else /* HAVE_POLL */
 #ifdef HAVE_SELECT
-	if(maxfd < 0)
-	    return true;
 	struct timeval tv;
 	tv.tv_sec = usec / 1000000;
 	tv.tv_usec = usec % 1000000;
 	fd_set Rfds, Wfds;
+	if(maxfd < 0){
+	    FD_ZERO(&Rfds);
+	    FD_SET(10, &Rfds);
+	    select(1, &Rfds, NULL, NULL, &tv);
+	    return true;
+	}
 	memcpy(&Rfds, &rfds, sizeof(rfds));
 	memcpy(&Wfds, &wfds, sizeof(wfds));
 	int selectRet = select(maxfd, &Rfds, &Wfds, NULL, &tv);
@@ -236,17 +242,34 @@ namespace ChunkedConnection {
 	    return false;
 	if(selectRet == 0)
 	    return true;
-	for(int i = 0; selectRet > 0 && i < maxfd; i++){
+
+#if 1
+	for(ConnectionStatusMap::iterator i = connectionStatusMap.begin(); selectRet > 0 && i != connectionStatusMap.end(); i++){
 	    int status = 0;
-	    if(FD_ISSET(i, &rfds))
+	    if(i->second == NULL)
+		continue;
+	    if(FD_ISSET(i->second->fd, &Rfds))
 		status = status | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK;
-	    if(FD_ISSET(i, &wfds))
+	    if(FD_ISSET(i->second->fd, &Wfds))
+		status = status | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK;
+	    if(status != 0){
+		Invoke(i->second->fd, (Cookai::ChunkedConnection::ConnectionStatus)status);
+		selectRet--;
+	    }
+	}
+#else
+	for(int i = 0; selectRet > 0 && i <= maxfd; i++){
+	    int status = 0;
+	    if(FD_ISSET(i, &Rfds))
+		status = status | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK;
+	    if(FD_ISSET(i, &Wfds))
 		status = status | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK;
 	    if(status != 0){
 		Invoke(i, (Cookai::ChunkedConnection::ConnectionStatus)status);
 		selectRet--;
 	    }
 	}
+#endif
 	return true;
 #endif /* HAVE_SELECT */
 #endif /* HAVE_POLL */

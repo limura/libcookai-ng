@@ -73,10 +73,12 @@ int check_printlevel(int lvl){
 #ifdef _LIBCOOKAI_WINDOWS_
 void windprintf(char *fmt, ...){
     char buf[10240];
+    wchar_t wbuf[5120];
     va_list ap;
     va_start(ap, fmt);
-    _vsnprintf(buf, sizeof(buf) -1, fmt, ap);
-    OutputDebugString((char *)buf);
+    vsnprintf_s(buf, sizeof(buf) -1, sizeof(buf) -1, fmt, ap);
+    mbstowcs(wbuf, buf, sizeof(wbuf));
+    OutputDebugString(wbuf);
     va_end(ap);
 }
 #endif /* _LIBCOOKAI_WINDOWS_ */

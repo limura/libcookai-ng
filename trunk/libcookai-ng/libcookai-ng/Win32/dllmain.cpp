@@ -1,5 +1,4 @@
-#include "pastry-like/config.h"
-#include "pastry-like/netio.h"
+#include "../config.h"
 #include <windows.h>
 
 int winsock_init(void){
@@ -18,7 +17,6 @@ int winsock_init(void){
 }
 
 void winsock_cleanup(void){
-    //netio_shutdown();
     WSACleanup();
 }
 

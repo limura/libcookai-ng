@@ -159,7 +159,7 @@ namespace ChunkedConnection {
 	while(!writeQueue->empty()){
 	    StaticBuffer *buf = writeQueue->front();
 	    WriteHeader(num, channel, (uint16_t)buf->GetDataLength(), buf);
-	    connection->NonBlockWrite(buf); // connection〓〓 StaticBuffer 〓〓 delete 〓〓〓〓
+	    connection->NonBlockWrite(buf);
 	    writeQueue->pop_front();
 	    num--;
 	}
@@ -173,6 +173,10 @@ namespace ChunkedConnection {
 	    return false;
 	WriteHeader(0, channel, (uint16_t)length, staticBuf);
 	staticBuf->Write(buf, length);
+	if(connection->WriteQueueEmpty())
+	    connectionManager->UpdateSelectStatus(this, connection->GetFD(),
+	    (Cookai::ChunkedConnection::ConnectionStatus)((int)Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK
+	        | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK));
 	connection->NonBlockWrite(staticBuf);
 	return true;
     }
@@ -184,9 +188,8 @@ namespace ChunkedConnection {
 	if(status != Cookai::ChunkedConnection::CONNECTION_STATUS_NONE){
 	    Cookai::ChunkedConnection::EventType eventType;
 	    Cookai::ChunkedConnection::Event *ev;
-	    if(connection->IsConnect()){
-		while(1){
-		    switch(eventType = connection->Run(&ev)){
+	    while(1){
+		switch(eventType = connection->Run(&ev)){
 		    case Cookai::ChunkedConnection::EVENT_NOTHING:
 			return true;
 			break;
@@ -213,12 +216,14 @@ namespace ChunkedConnection {
 		    }
 		    if(ev != NULL)
 			eventPool->AddEvent(ev);
-		}
-	    }else{
-		Connect();
 	    }
+	    if(connection->WriteQueueEmpty())
+		connectionManager->UpdateSelectStatus(this, connection->GetFD(),
+		Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
+	}else{
+	    Connect();
 	}
-	return true;
+    	return true;
     }
 
     int ChunkedConnection::Connect(void){

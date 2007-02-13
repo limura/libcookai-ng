@@ -90,7 +90,7 @@ namespace ChunkedConnection {
     bool Connection::Initialize(char *name, char *service, size_t newChunkSize){
 	fd = -1;
 	nbConnect = NULL;
-	status = STATUS_DISOCNNECTED;
+	status = STATUS_DISCONNECTED;
 	chunkSize = 500;
 	if(newChunkSize > 500)
 	    chunkSize = newChunkSize;
@@ -165,6 +165,7 @@ namespace ChunkedConnection {
     }
 
     int Connection::GetFD(void){
+	return fd;
 	if(IsConnect()){
 	    return fd;
 	}
@@ -178,7 +179,7 @@ namespace ChunkedConnection {
 	if(remoteName == NULL || remoteService == NULL)
 	    return false;
 
-	if(fd < 0){
+	if(fd < 0 || status != STATUS_CONNECTED){
 	    if(nbConnect == NULL){
 		nbConnect = new NonBlockConnect();
 		if(nbConnect == NULL)
@@ -196,13 +197,16 @@ namespace ChunkedConnection {
 	    }
 	    switch(nbConnect->Run(&fd)){
 		case NonBlockConnect::CONNECTED:
+		    status = STATUS_CONNECTED;
 		    return true;
 		    break;
 		case NonBlockConnect::TRYING:
+		    status = STATUS_CONNECTING;
 		    return true;
 		    break;
 		case NonBlockConnect::FAILED:
 		default:
+		    status = STATUS_DISCONNECTED;
 		    return false;
 	    }
 	    return false;
@@ -221,6 +225,7 @@ namespace ChunkedConnection {
     }
 
     void Connection::Disconnect(){
+	status = STATUS_DISCONNECTED;
 	if(fd >= 0){
 	    shutdown(fd, 2);
 #ifdef HAVE_CLOSESOCKET
@@ -235,9 +240,14 @@ namespace ChunkedConnection {
     Cookai::ChunkedConnection::EventType Connection::Run(Event **eventReturn){
 	if(eventReturn != NULL)
 	    *eventReturn = NULL;
-	if(fd < 0)
+	if(fd < 0){
 	    Connect();
-	if(fd < 0)
+	}else if(status != STATUS_CONNECTED){
+	    Connect();
+	    if(status == STATUS_DISCONNECTED)
+		goto Run_SocketError;
+	}
+	if(fd < 0 || status != STATUS_CONNECTED)
 	    return Cookai::ChunkedConnection::EVENT_NOTHING;
 Run_StreamReadPart:
 	if(streamEvent != NULL){
@@ -367,6 +377,10 @@ Run_SocketError:
 	writeBufferList.push_back(buf);
 	thread_mutex_unlock(&writeBufferMutex);
 	return true;
+    }
+
+    bool Connection::WriteQueueEmpty(void){
+	return writeBufferList.empty();
     }
 
 };

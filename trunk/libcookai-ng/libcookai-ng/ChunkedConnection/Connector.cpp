@@ -32,10 +32,13 @@
 
 namespace Cookai {
 namespace ChunkedConnection {
-    Connector::Connector(void){
+    Connector::Connector(ReadHandler AcceptEventHandler, char *serviceName){
 	manager = new ConnectionManager();
 	eventPool = new EventPool();
-	manager->AddInterface(new Cookai::ChunkedConnection::ConnectionAcceptor(eventPool));
+	Cookai::ChunkedConnection::ConnectionAcceptor *ca = new Cookai::ChunkedConnection::ConnectionAcceptor(eventPool, AcceptEventHandler);
+	if(ca != NULL)
+	    ca->Connect(serviceName);
+	manager->AddInterface(ca);
 	thread_create(&tid, (thread_func)LoopFunc, this);
     }
 
@@ -85,7 +88,7 @@ namespace ChunkedConnection {
 	    cc->SetErrorHandler(errorHandler);
 	    manager->AddInterface(cc);
 
-	    cc->Connect();
+	    //cc->Connect();
 
 	    return cc;
     }

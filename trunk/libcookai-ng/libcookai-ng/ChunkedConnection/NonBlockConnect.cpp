@@ -25,6 +25,8 @@
  * $Id$
  */
 
+#include "../tools/tools.h"
+
 #include "NonBlockConnect.h"
 
 #include <errno.h>
@@ -110,6 +112,7 @@ namespace ChunkedConnection {
 #endif
 #ifdef HAVE_WSAGETLASTERROR
 		   || WSAGetLastError() == WSAEWOULDBLOCK
+		   || WSAGetLastError() == WSAEALREADY
 #endif
 #ifdef EAGAIN
 		   || errno == EAGAIN
@@ -119,16 +122,35 @@ namespace ChunkedConnection {
 			status = TRYING;
 			return TRYING;
 		}
+#ifdef HAVE_WSAGETLASTERROR
+		else if(WSAGetLastError() == WSAEISCONN){
+		    status = CONNECTED;
+		    *fd_return = fd;
+		    if(res0 != NULL)
+			freeaddrinfo(res0);
+		    res0 = res = NULL;
+		    return CONNECTED;
+		}
+#endif
 #ifdef HAVE_CLOSESOCKET
 		closesocket(fd);
 #else
 		close(fd);
+#endif
+		status = FAILED;
+#ifdef DEBUG
+		// error list http://homepage1.nifty.com/yito/anhttpd/winsock_error.html
+		int err = WSAGetLastError();
+		DPRINTF(10, ("err: %d\r\n", err));
 #endif
 		fd = -1;
 		return Run(fd_return);
 	    }
 	    *fd_return = fd;
 	    status = CONNECTED;
+	    if(res0 != NULL)
+		freeaddrinfo(res0);
+	    res0 = res = NULL;
 	    return CONNECTED;
 	}
 
@@ -138,11 +160,18 @@ namespace ChunkedConnection {
 	    res = res0;
 	}else{
 	    res = res->ai_next;
-	    if(res == NULL)
+	    if(res == NULL){
+		freeaddrinfo(res0);
+		res0 = NULL;
 		return FAILED;
+	    }
 	}
 
-	fd = (int)socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+#ifdef HAVE_WSASOCKET
+	fd = (int)WSASocket(res->ai_family, res->ai_socktype, res->ai_protocol, NULL, 0, WSA_FLAG_OVERLAPPED); 
+#else
+	fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+#endif
 #ifdef HAVE_FCNTL
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 #endif

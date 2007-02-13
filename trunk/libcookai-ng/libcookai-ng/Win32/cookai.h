@@ -25,6 +25,8 @@
  * $Id$
  */
 
+#include <windows.h>
+
 #ifndef WIN32_COOKAI_H
 #define WIN32_COOKAI_H
 

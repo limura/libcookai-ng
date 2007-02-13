@@ -26,6 +26,7 @@
  */
 
 #include "../config.h"
+#include "../tools/tools.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -131,6 +132,12 @@ int StaticBuffer::ReadFromSocket(int fd, size_t *readSize){
 	    ){
 		return 1;
 	}
+#ifdef HAVE_WSAGETLASTERROR
+	int err = WSAGetLastError();
+#else
+	int err = errno;
+#endif
+	DPRINTF(10, ("err: %d\r\n", err));
 	return -1;
     }else{
 	writePos += length;

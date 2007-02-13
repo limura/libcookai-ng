@@ -30,6 +30,7 @@
 #include "ConnectionManager.h"
 #include "ConnectionManagerInterface.h"
 #include "EventPool.h"
+#include "Event.h"
 
 #ifndef COOKAI_CHUNKEDCONNECTION_CONNECTIONACCEPTOR_H
 #define COOKAI_CHUNKEDCONNECTION_CONNECTIONACCEPTOR_H
@@ -37,16 +38,15 @@
 namespace Cookai {
 namespace ChunkedConnection {
 
-#define COOKAI_DEFAULT_ACCEPT_PORT "1203"
-
     class ConnectionAcceptor : public ConnectionManagerInterface {
     private:
 	int acceptSocketFD;
 	ConnectionManager *connectionManager;
 	EventPool *eventPool;
+	ReadHandler acceptEventHandler;
 
     public:
-	ConnectionAcceptor(EventPool *pool);
+	ConnectionAcceptor(EventPool *pool, ReadHandler AcceptEventHandler);
 	~ConnectionAcceptor(void);
 
 	int Connect(void);

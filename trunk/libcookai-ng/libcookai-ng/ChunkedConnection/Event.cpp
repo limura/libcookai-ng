@@ -37,7 +37,7 @@ namespace ChunkedConnection {
 	buf = Buf;
 	channel = Channel;
 	handler = Handler;
-	cc = cc;
+	cc = Cc;
     }
 
     Event::~Event(void){

@@ -65,6 +65,7 @@
 #define HAVE_POLL
 #define HAVE_SYS_SELECT_H
 #define HAVE_SELECT
+#undef HAVE_WSASOCKET
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -111,6 +112,7 @@
 #define HAVE_POLL
 #define HAVE_SYS_SELECT_H
 #define HAVE_SELECT
+#undef HAVE_WSASOCKET
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -153,6 +155,7 @@
 #define HAVE_POLL
 #define HAVE_SYS_SELECT_H
 #define HAVE_SELECT
+#undef HAVE_WSASOCKET
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -196,6 +199,7 @@
 #define HAVE_POLL
 #define HAVE_SYS_SELECT_H
 #define HAVE_SELECT
+#undef HAVE_WSASOCKET
 
 #define USE_THREAD
 #undef HAVE_WINDOWS_H
@@ -242,10 +246,12 @@
 #define HAVE_MMSYSTEM_H
 #define HAVE__READ
 #define HAVE__SNPRINTF
+#define HAVE_SLEEPEX
 #undef HAVE_POLL_H
 #undef HAVE_POLL
 #undef HAVE_SYS_SELECT_H
 #define HAVE_SELECT
+#define HAVE_WSASOCKET
 
 #define USE_THREAD
 #define HAVE_WINDOWS_H
