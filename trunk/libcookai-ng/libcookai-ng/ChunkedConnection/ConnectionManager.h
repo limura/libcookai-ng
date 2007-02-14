@@ -27,6 +27,7 @@
 #include "../config.h"
 
 #include <map>
+#include <list>
 
 #ifdef HAVE_POLL_H
 #include <poll.h>
@@ -37,6 +38,8 @@
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+
+#include "../tools/thread.h"
 
 #include "ConnectionManagerInterface.h"
 
@@ -55,6 +58,10 @@ namespace ChunkedConnection {
 	} ManagerInterface;
 	typedef std::map<ConnectionManagerInterface *, ManagerInterface *> ConnectionStatusMap;
 	ConnectionStatusMap connectionStatusMap;
+	thread_mutex initialConnectionListMutex;
+	typedef std::list<ConnectionManagerInterface *> InitialConnectionList;
+	InitialConnectionList initialConnectionList;
+
 	void Invoke(int fd, Cookai::ChunkedConnection::ConnectionStatus status);
 	void AddFDWatcher(int fd);
 	void DeleteFDWatcher(int fd);

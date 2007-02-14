@@ -276,7 +276,9 @@ Run_StreamReadPart:
 	if(streamEvent != NULL){
 	    int ret;
 	    StaticBuffer *sb = streamEvent->GetBuffer();
-	    if(sb == NULL || (ret = sb->ReadFromSocket(fd)) == 0){
+	    if(sb == NULL)
+		return Cookai::ChunkedConnection::EVENT_NOTHING;
+	    if((ret = sb->ReadFromSocket(fd)) == 0){
 		sb->ReadSeek(0);
 		if(eventReturn != NULL)
 		    *eventReturn = streamEvent;
@@ -295,7 +297,9 @@ Run_BlockReadPart:
 	if(blockEvent != NULL && blockChunkLength > 0){
 	    int ret;
 	    StaticBuffer *sb = blockEvent->GetBuffer();
-	    if(sb == NULL || (ret = sb->ReadFromSocket(fd, &blockChunkLength)) == 0){
+	    if(sb == NULL)
+		return Cookai::ChunkedConnection::EVENT_NOTHING;
+	    if((ret = sb->ReadFromSocket(fd, &blockChunkLength)) == 0){
 		blockChunkLength = 0;
 		if(nowChunkNum > 1)
 		    goto Run_ChunkHeaderReadPart;
@@ -314,7 +318,7 @@ Run_BlockReadPart:
 	    return Cookai::ChunkedConnection::EVENT_NOTHING;
 	}
 Run_ChunkHeaderReadPart:
-	if(readHeaderBuffer->GetAvailableSize() > 0){
+	if(readHeaderBuffer->GetAvailableSize() >= 0){
 	    int ret = readHeaderBuffer->ReadFromSocket(fd);
 	    if(ret < 0){
 		if(eventReturn != NULL)
@@ -327,6 +331,7 @@ Run_ChunkHeaderReadPart:
 		header.nextChunkNum = readHeaderBuffer->ReadUint8();
 		header.channel = readHeaderBuffer->ReadUint8();
 		header.length = readHeaderBuffer->ReadUint16();
+		readHeaderBuffer->Clear();
 		if(header.nextChunkNum == 0){ // Stream data.
 		    StaticBuffer *tmpStreamBuffer = new StaticBuffer(header.length);
 		    if(tmpStreamBuffer == NULL)
@@ -357,6 +362,7 @@ Run_ChunkHeaderReadPart:
 		}
 	    }
 	}
+	return Cookai::ChunkedConnection::EVENT_NOTHING;
 
 Run_SocketError:
 	Disconnect();

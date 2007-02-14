@@ -27,6 +27,7 @@
 
 #include "../config.h"
 #include "../tools/tools.h"
+#include "../tools/thread.h"
 
 #include <stdlib.h>
 
@@ -47,6 +48,8 @@ namespace ChunkedConnection {
 
     ConnectionManager::ConnectionManager(void){
 	connectionStatusMap.clear();
+	initialConnectionList.clear();
+	thread_mutex_init(&initialConnectionListMutex, NULL);
 #ifdef HAVE_POLL
 	pollfds = NULL;
 	nfds = 0;
@@ -63,6 +66,8 @@ namespace ChunkedConnection {
 	    delete (i->second);
 	}
 	connectionStatusMap.clear();
+	initialConnectionList.clear();
+	thread_mutex_destroy(&initialConnectionListMutex);
     }
 
     Cookai::ChunkedConnection::ConnectionManager::ManagerInterface *ConnectionManager::GetManagerInterface(ConnectionManagerInterface *Interface){
@@ -83,9 +88,9 @@ namespace ChunkedConnection {
 	if(Interface == NULL)
 	    return;
 	Interface->RegisterConnectionManager(this);
-	int fd = Interface->Connect();
-	if(fd >= 0)
-	    UpdateSelectStatus(Interface, fd, Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
+	thread_mutex_lock(&initialConnectionListMutex);
+	initialConnectionList.push_back(Interface);
+	thread_mutex_unlock(&initialConnectionListMutex);
     }
 
     void ConnectionManager::AddFDWatcher(int fd){
@@ -149,10 +154,14 @@ namespace ChunkedConnection {
 	    if(mi->fd != fd && mi->fd >= 0)
 		DeleteFDWatcher(fd);
 	}else{
+	    if(fd < 0)
+		return;
 	    mi = GetManagerInterface(Interface); // alloc
 	    if(mi == NULL)
 		return;
 	}
+	if(fd < 0)
+	    return;
 	mi->status = status;
 	if(mi->fd != fd)
 	    AddFDWatcher(fd);
@@ -203,6 +212,19 @@ namespace ChunkedConnection {
     }
 
     bool ConnectionManager::Run(int usec){
+	if(!initialConnectionList.empty()){
+	    thread_mutex_lock(&initialConnectionListMutex);
+	    while(!initialConnectionList.empty()){
+		ConnectionManagerInterface *Interface = initialConnectionList.front();
+		if(Interface != NULL){
+		    int fd = Interface->Connect();
+		    if(fd >= 0)
+			UpdateSelectStatus(Interface, fd, Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
+		}
+		initialConnectionList.pop_front();
+	    }
+	    thread_mutex_unlock(&initialConnectionListMutex);
+	}
 #ifdef HAVE_POLL
 	if(pollfds == NULL){
 	    usleep(usec);
@@ -247,7 +269,7 @@ namespace ChunkedConnection {
 	if(selectRet == 0)
 	    return true;
 
-#if 1
+#if 0
 	for(ConnectionStatusMap::iterator i = connectionStatusMap.begin(); selectRet > 0 && i != connectionStatusMap.end(); i++){
 	    int status = 0;
 	    if(i->second == NULL)

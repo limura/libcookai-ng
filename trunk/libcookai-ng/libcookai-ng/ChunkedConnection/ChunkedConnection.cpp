@@ -121,6 +121,15 @@ namespace ChunkedConnection {
 	errorHandler = handler;
     }
 
+    bool ChunkedConnection::BlockWrite(char *buf, int channel){
+	if(buf == NULL)
+	    return false;
+	size_t length = strlen(buf);
+	return BlockWrite((unsigned char *)buf, length, channel);
+    }
+    bool ChunkedConnection::BlockWrite(std::string buf, int channel){
+	return BlockWrite((unsigned char *)buf.c_str(), buf.length(), channel);
+    }
     bool ChunkedConnection::BlockWrite(unsigned char *buf, size_t length, int channel){
 	WriteQueue *writeQueue = NULL;
 	writeQueue = GetWriteQueue(channel);
@@ -164,6 +173,15 @@ namespace ChunkedConnection {
 	    num--;
 	}
 	return true;
+    }
+    bool ChunkedConnection::StreamWrite(char *buf, int channel){
+	if(buf == NULL)
+	    return false;
+	size_t length = strlen(buf);
+	return StreamWrite((unsigned char *)buf, length, channel);
+    }
+    bool ChunkedConnection::StreamWrite(std::string buf, int channel){
+	return StreamWrite((unsigned char *)buf.c_str(), buf.length(), channel);
     }
     bool ChunkedConnection::StreamWrite(unsigned char *buf, size_t length, int channel){
 	if(buf == NULL || length <= 0 || connection == NULL)
@@ -216,7 +234,7 @@ namespace ChunkedConnection {
 		}
 		if(ev != NULL)
 		    eventPool->AddEvent(ev);
-		break; // XXXXX multiple Run() call are break on Win32.
+		//break; // XXXXX multiple Run() call are break on Win32.
 	    }
 Run_UpdateStatus:
 	    if(connection->WriteQueueEmpty())

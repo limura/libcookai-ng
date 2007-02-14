@@ -160,6 +160,7 @@ namespace ChunkedConnection {
 		    ){
 			*fd_return = fd;
 			status = TRYING;
+			DPRINTF(10, ("    connect trying. fd: %d\r\n", fd));
 			return TRYING;
 		}
 #ifdef HAVE_WSAGETLASTERROR
@@ -169,7 +170,7 @@ namespace ChunkedConnection {
 		    if(res0 != NULL)
 			freeaddrinfo(res0);
 		    res0 = res = NULL;
-		    DPRINTF(10, ("connected. fd; %d\r\n", fd));
+		    DPRINTF(10, ("connected. fd: %d\r\n", fd));
 		    return CONNECTED;
 		}
 #endif

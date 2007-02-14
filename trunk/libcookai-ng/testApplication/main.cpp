@@ -103,13 +103,14 @@ bool readHandler(EventType type, StaticBuffer *buf, int channel, ChunkedConnecti
 	    cc->SetStreamReadHandler(readHandler);
 	    cc->SetErrorHandler(readHandler);
 
-#if 0
-	    cc->StreamWrite((unsigned char *)"hogehoge", 9);
-	    cc->StreamWrite((unsigned char *)"hogeHOGE", 9);
-	    cc->StreamWrite((unsigned char *)"HOGEhoge", 9);
-	    cc->BlockWrite((unsigned char *)"hogehoge", 8);
-	    cc->BlockWrite((unsigned char *)"HOGEhoge", 8);
-	    cc->BlockWrite((unsigned char *)"hogeHOGE", 9);
+#if 1
+	    cc->StreamWrite((unsigned char *)"stream send No 1", 17);
+	    cc->StreamWrite((unsigned char *)"stream No 2", 12);
+	    cc->StreamWrite((unsigned char *)"STREAM No 3 hoge hoge", 22);
+	    cc->BlockWrite("block writing.");
+	    cc->BlockWrite(" add block.");
+	    cc->BlockWrite(" add block No 2.");
+	    cc->BlockWrite((unsigned char *)"", 1);
 	    cc->BlockCommit();
 #endif
 	}
@@ -147,10 +148,10 @@ int main(int argc, char *argv[]){
     
     if(cc != NULL){
 	cc->StreamWrite((unsigned char *)"HogeHoge", 9);
-	cc->StreamWrite((unsigned char *)"HogEHogE", 9);
+	cc->StreamWrite((unsigned char *)"HogEHogEH", 10);
 	cc->StreamWrite((unsigned char *)"HoGEHoGE", 9);
-	cc->BlockWrite((unsigned char *)"HoGEHOGE", 8);
-	cc->BlockWrite((unsigned char *)"HOgEHOGE", 8);
+	cc->BlockWrite((unsigned char *)"HoGEHOG", 7);
+	cc->BlockWrite((unsigned char *)"HOgEHO", 6);
 	cc->BlockWrite((unsigned char *)"HOGeHOGE", 9);
 	cc->BlockCommit();
     }

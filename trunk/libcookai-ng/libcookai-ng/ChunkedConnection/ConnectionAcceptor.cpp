@@ -27,6 +27,7 @@
 
 #include "../config.h"
 #include "../tools/net.h"
+#include "../tools/tools.h"
 
 #include <stdio.h>
 
@@ -91,6 +92,7 @@ namespace ChunkedConnection {
 	    socklen_t addrlen = sizeof(addrs);
 	    int acceptedSocket = (int)accept(acceptSocketFD, (sockaddr *)&addrs, &addrlen);
 	    if(acceptedSocket >= 0){
+		DPRINTF(10, ("new connection got. FD: %d (accept)\r\n", acceptedSocket));
 		char nameBuf[1024], serviceBuf[64];
 		nameBuf[0] = serviceBuf[0] = '\0';
 		switch(addrs.ss_family){
@@ -120,6 +122,10 @@ namespace ChunkedConnection {
 		ChunkedConnection *cc = new Cookai::ChunkedConnection::ChunkedConnection(acceptedSocket, nameBuf, serviceBuf, eventPool);
 		if(cc == NULL)
 		    return false;
+		if(connectionManager != NULL){
+		    connectionManager->UpdateSelectStatus(cc, acceptedSocket, Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
+		    cc->RegisterConnectionManager(connectionManager);
+		}
 		Cookai::ChunkedConnection::Event *ev = new Cookai::ChunkedConnection::Event(Cookai::ChunkedConnection::EVENT_ACCEPT_NEW_SOCKET,
 		    NULL, cc, 0, acceptEventHandler);
 		if(ev == NULL)

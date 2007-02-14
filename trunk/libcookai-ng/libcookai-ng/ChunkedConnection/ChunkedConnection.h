@@ -82,8 +82,12 @@ namespace ChunkedConnection {
 	char *GetRemoteService(void);
 
 	bool BlockWrite(unsigned char *buf, size_t length, int channel = 0);
+	bool BlockWrite(char *buf, int channel = 0);
+	bool BlockWrite(std::string buf, int channel = 0);
 	bool BlockCommit(int channel = 0);
 	bool StreamWrite(unsigned char *buf, size_t length, int channel = 0);
+	bool StreamWrite(char *buf, int channel = 0);
+	bool StreamWrite(std::string buf, int channel = 0);
 
 	int Connect(void);
 	void RegisterConnectionManager(ConnectionManager *cm);

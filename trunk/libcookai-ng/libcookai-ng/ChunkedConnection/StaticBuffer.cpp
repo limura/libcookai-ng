@@ -206,6 +206,10 @@ bool StaticBuffer::ReadSeek(size_t newPosition){
     return true;
 }
 
+void StaticBuffer::Clear(void){
+    readPos = writePos = 0;
+}
+
 bool StaticBuffer::Write(unsigned char *WriteBuf, size_t dataSize){
     if(dataSize > size - writePos)
 	return false;
