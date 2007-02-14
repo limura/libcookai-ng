@@ -26,6 +26,7 @@
  */
 
 #include "../config.h"
+#include "../tools/tools.h"
 #include <string>
 #include <string.h>
 
@@ -163,44 +164,44 @@ namespace ChunkedConnection {
 	if(remoteName == NULL || remoteService == NULL)
 	    return false;
 
-	if(fd < 0 || status != STATUS_CONNECTED){
-	    if(nbConnect == NULL){
-		nbConnect = new NonBlockConnect();
-		if(nbConnect == NULL)
-		    return false;
-		if(nbConnect->SetTarget(remoteName, remoteService) == false){
-		    delete nbConnect;
-		    nbConnect = NULL;
-		    return false;
+	if(fd >= 0 && status == STATUS_CONNECTED)
+	    return true;
+
+	if(nbConnect == NULL){
+	    nbConnect = new NonBlockConnect();
+	    if(nbConnect == NULL)
+		return false;
+	    if(nbConnect->SetTarget(remoteName, remoteService) == false){
+		delete nbConnect;
+		nbConnect = NULL;
+		return false;
+	    }
+	}
+	DPRINTF(10, ("connecting to %s:%s (%d)\r\n", remoteName, remoteService, fd));
+	switch(nbConnect->Run(&fd)){
+	case NonBlockConnect::CONNECTED:
+	    status = STATUS_CONNECTED;
+	    DPRINTF(10, ("connect success %d\r\n", fd));
+	    {
+		int optval;
+		socklen_t optlen;
+		optval = 1;
+		optlen = sizeof(optval);
+		if(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&optval, optlen) != 0){
+		    // nothing to do! we need not TCP_NODELAY.
 		}
 	    }
-	    switch(nbConnect->Run(&fd)){
-		case NonBlockConnect::CONNECTED:
-		    status = STATUS_CONNECTED;
-		    return true;
-		    break;
-		case NonBlockConnect::TRYING:
-		    status = STATUS_CONNECTING;
-		    return true;
-		    break;
-		case NonBlockConnect::FAILED:
-		default:
-		    status = STATUS_DISCONNECTED;
-		    return false;
-	    }
+	    return Handshake();
+	case NonBlockConnect::TRYING:
+	    status = STATUS_CONNECTING;
+	    return true;
+	case NonBlockConnect::FAILED:
+	default:
+	    status = STATUS_DISCONNECTED;
+	    DPRINTF(10, ("connect FAILED %d\r\n", fd));
 	    return false;
 	}
-
-	nbConnect->Run(&fd);
-	{
-	    int optval;
-	    socklen_t optlen;
-	    optval = 1;
-	    optlen = sizeof(optval);
-	    if(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&optval, optlen) != 0)
-		return false; // XXXXXXXX
-	}
-	return Handshake();
+	return false;
     }
 
     void Connection::Disconnect(){
@@ -216,7 +217,50 @@ namespace ChunkedConnection {
 	}
     }
 
-    Cookai::ChunkedConnection::EventType Connection::Run(Event **eventReturn){
+    Cookai::ChunkedConnection::EventType Connection::Run(Event **eventReturn, Cookai::ChunkedConnection::ConnectionStatus status){
+	EventType eventType;
+	DPRINTF(10, ("ChunkedConnection Run(%d)\r\n", status));
+	if(status & Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK){
+	    eventType = RunWrite(eventReturn);
+	    if(eventType != Cookai::ChunkedConnection::EVENT_NOTHING)
+		return eventType;
+	}
+	if(status & Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK)
+	    return RunRead(eventReturn);
+	return Cookai::ChunkedConnection::EVENT_NOTHING;
+    }
+
+    Cookai::ChunkedConnection::EventType Connection::RunWrite(Event **eventReturn){
+	if(fd < 0 || status != STATUS_CONNECTED)
+	    return Cookai::ChunkedConnection::EVENT_NOTHING;
+
+	thread_mutex_lock(&writeBufferMutex);
+	while(!writeBufferList.empty()){
+	    StaticBuffer *sb = writeBufferList.front();
+	    if(sb != NULL){
+		int ret = sb->WriteToSocket(fd);
+		if(ret == 0){ // this buffer send complete;
+		    delete sb;
+		    writeBufferList.pop_front();
+		    continue;
+		}else if(ret < 0){
+		    if(eventReturn != NULL)
+			*eventReturn = NULL;
+		    thread_mutex_unlock(&writeBufferMutex);
+		    Disconnect();
+		    return Cookai::ChunkedConnection::EVENT_ERROR_SOCKET_CLOSE;
+		}
+		break;
+	    }else{
+		break;
+	    }
+	}
+	thread_mutex_unlock(&writeBufferMutex);
+	return Cookai::ChunkedConnection::EVENT_NOTHING;
+    }
+
+    Cookai::ChunkedConnection::EventType Connection::RunRead(Event **eventReturn){
+	DPRINTF(10, ("reciving from %d.\r\n", fd));
 	if(eventReturn != NULL)
 	    *eventReturn = NULL;
 	if(fd < 0){
@@ -245,7 +289,7 @@ Run_StreamReadPart:
 		streamEvent = NULL;
 		goto Run_SocketError;
 	    }
-	    goto Run_WritePart;
+	    return Cookai::ChunkedConnection::EVENT_NOTHING;
 	}
 Run_BlockReadPart:
 	if(blockEvent != NULL && blockChunkLength > 0){
@@ -267,7 +311,7 @@ Run_BlockReadPart:
 		blockEvent = NULL;
 		goto Run_SocketError;
 	    }
-	    goto Run_WritePart;
+	    return Cookai::ChunkedConnection::EVENT_NOTHING;
 	}
 Run_ChunkHeaderReadPart:
 	if(readHeaderBuffer->GetAvailableSize() > 0){
@@ -313,29 +357,6 @@ Run_ChunkHeaderReadPart:
 		}
 	    }
 	}
-
-Run_WritePart:
-	thread_mutex_lock(&writeBufferMutex);
-	while(!writeBufferList.empty()){
-	    StaticBuffer *sb = writeBufferList.front();
-	    if(sb != NULL){
-		int ret = sb->WriteToSocket(fd);
-		if(ret == 0){ // this buffer send complete;
-		    delete sb;
-		    writeBufferList.pop_front();
-		    continue;
-		}else if(ret < 0){
-		    if(eventReturn != NULL)
-			*eventReturn = NULL;
-		    thread_mutex_unlock(&writeBufferMutex);
-		    goto Run_SocketError;
-		}
-		break;
-	    }
-
-	}
-	thread_mutex_unlock(&writeBufferMutex);
-	return Cookai::ChunkedConnection::EVENT_NOTHING;
 
 Run_SocketError:
 	Disconnect();

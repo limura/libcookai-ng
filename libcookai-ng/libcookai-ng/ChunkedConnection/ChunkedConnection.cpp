@@ -189,7 +189,7 @@ namespace ChunkedConnection {
 	    Cookai::ChunkedConnection::EventType eventType;
 	    Cookai::ChunkedConnection::Event *ev;
 	    while(1){
-		switch(eventType = connection->Run(&ev)){
+		switch(eventType = connection->Run(&ev, status)){
 		    case Cookai::ChunkedConnection::EVENT_NOTHING:
 			return true;
 			break;
@@ -213,9 +213,10 @@ namespace ChunkedConnection {
 		    case Cookai::ChunkedConnection::EVENT_ACCEPT_NEW_SOCKET:
 		    default:
 			return false;
-		    }
-		    if(ev != NULL)
-			eventPool->AddEvent(ev);
+		}
+		if(ev != NULL)
+		    eventPool->AddEvent(ev);
+		break;
 	    }
 	    if(connection->WriteQueueEmpty())
 		connectionManager->UpdateSelectStatus(this, connection->GetFD(),
@@ -233,13 +234,7 @@ namespace ChunkedConnection {
 	    return connection->GetFD();
 
 	connection->Connect();
-	int fd = connection->GetFD();
-	if(fd < 0)
-	    return -1;
-
-	if(connectionManager != NULL)
-	    connectionManager->UpdateSelectStatus(this, fd, Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
-	return fd;
+	return connection->GetFD();
     }
 };
 }; /* namespace Cookai */

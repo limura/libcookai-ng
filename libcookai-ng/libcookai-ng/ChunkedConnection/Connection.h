@@ -36,6 +36,7 @@
 #include "StaticBuffer.h"
 #include "NonBlockConnect.h"
 #include "Event.h"
+#include "ConnectionManagerInterface.h"
 
 namespace Cookai {
 namespace ChunkedConnection {
@@ -74,6 +75,8 @@ namespace ChunkedConnection {
 	bool Initialize(char *name, char *service, size_t newChunkSize);
 	bool Handshake(void);
 	bool Read(void);
+	Cookai::ChunkedConnection::EventType RunRead(Event **eventReturn);
+	Cookai::ChunkedConnection::EventType RunWrite(Event **eventReturn);
 
     public:
 	Connection(char *name, char *service, size_t chunkSize = 1414);
@@ -90,7 +93,7 @@ namespace ChunkedConnection {
 	char *GetRemoteName(void);
 	char *GetRemoteService(void);
 
-	Cookai::ChunkedConnection::EventType Run(Event **eventReturn);
+	Cookai::ChunkedConnection::EventType Run(Event **eventReturn, Cookai::ChunkedConnection::ConnectionStatus status);
 	bool NonBlockWrite(unsigned char *buf, size_t length);
 	bool NonBlockWrite(StaticBuffer *buf);
 	StaticBuffer *NonBlockRead(int *channel, bool *isStream);

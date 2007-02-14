@@ -43,7 +43,7 @@ using namespace Cookai::ChunkedConnection;
 #ifdef _LIBCOOKAI_WINDOWS_
 int winsock_init(void){
     WSADATA wsad;
-    short int wVersion = MAKEWORD(2,0);
+    short int wVersion = MAKEWORD(2,2);
     int err;
     err = WSAStartup(wVersion, &wsad);
     if(err != 0)
@@ -130,7 +130,10 @@ int main(int argc, char *argv[]){
     Connector *c1, *c2;
 
 #ifdef _LIBCOOKAI_WINDOWS_
-    winsock_init();
+    if(winsock_init() != 0){
+	DPRINTF(10, ("winsock init fail\r\n"));
+	return 1;
+    }
 #endif
 
     c1 = new Connector(readHandler, "8472");

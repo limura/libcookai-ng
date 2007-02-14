@@ -26,6 +26,7 @@
  */
 
 #include "../config.h"
+#include "../tools/tools.h"
 
 #include <stdlib.h>
 
@@ -88,6 +89,7 @@ namespace ChunkedConnection {
     }
 
     void ConnectionManager::AddFDWatcher(int fd){
+	DPRINTF(10, (" AddFDWatcher(%d)\r\n", fd));
 #ifdef HAVE_POLL
 	if(pollfds == NULL){
 	    pollfds = (struct pollfd *)malloc(sizeof(struct pollfd));
@@ -110,6 +112,7 @@ namespace ChunkedConnection {
 #endif /* HAVE_POLL */
     }
     void ConnectionManager::DeleteFDWatcher(int fd){
+	DPRINTF(10, (" DeleteFDWatcher(%d)\r\n", fd));
 #ifdef HAVE_POLL
 	if(nfds <= 0)
 	    return;
@@ -145,18 +148,19 @@ namespace ChunkedConnection {
 	if(mi != NULL){
 	    if(mi->fd != fd && mi->fd >= 0)
 		DeleteFDWatcher(fd);
-	    mi->status = status;
-	    mi->fd = fd;
-	    mi->Interface = Interface;
 	}else{
 	    mi = GetManagerInterface(Interface); // alloc
 	    if(mi == NULL)
 		return;
-	    mi->status = status;
-	    mi->fd = fd;
-	    mi->Interface = Interface;
-	    AddFDWatcher(fd);
 	}
+	mi->status = status;
+	if(mi->fd != fd)
+	    AddFDWatcher(fd);
+	mi->fd = fd;
+	mi->Interface = Interface;
+
+	DPRINTF(10, (" update FD watcher: %d -> %d\r\n", fd, status));
+
 #ifdef HAVE_POLL
 	if(pollfds != NULL){
 	    for(int i = 0; i < nfds; i++){

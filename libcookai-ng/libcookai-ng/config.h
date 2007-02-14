@@ -252,6 +252,7 @@
 #undef HAVE_SYS_SELECT_H
 #define HAVE_SELECT
 #define HAVE_WSASOCKET
+#define HAVE_WSACONNECT
 
 #define USE_THREAD
 #define HAVE_WINDOWS_H
