@@ -48,6 +48,7 @@ namespace ChunkedConnection {
 	StaticBuffer(unsigned char *buf, size_t size); // Ç±Ç±Ç≈éwíËÇ≥ÇÍÇΩ buf ÇÕ StaticBuffer ä«óùÇ≈ free() Ç≥ÇÍÇÈ
 	~StaticBuffer(void);
 
+	void Clear(void);
 	unsigned char *GetBuffer(void);
 	size_t GetDataLength(void);
 	size_t GetBufferSize(void);

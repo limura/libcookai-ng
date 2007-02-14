@@ -56,7 +56,7 @@ namespace ChunkedConnection {
 	    return;
 
 	while(1){
-	    self->RunTick(1000000);
+	    self->RunTick(10000);
 	}
     }
 
@@ -87,8 +87,6 @@ namespace ChunkedConnection {
 	    cc->SetBlockReadHandler(blockHandler);
 	    cc->SetErrorHandler(errorHandler);
 	    manager->AddInterface(cc);
-
-	    //cc->Connect();
 
 	    return cc;
     }
