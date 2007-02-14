@@ -39,7 +39,7 @@
 namespace Cookai {
 namespace ChunkedConnection {
 
-#define COOKAI_DEFAULT_ACCEPT_PORT "1203"
+#define COOKAI_DEFAULT_ACCEPT_PORT "tcpport://1203"
 
     class Connector {
     private:
@@ -52,10 +52,10 @@ namespace ChunkedConnection {
 	void RunTick(int usec);
 
     public:
-	Connector(ReadHandler AcceptEventHandler, char *serviceName = COOKAI_DEFAULT_ACCEPT_PORT);
+	Connector(char *serviceName = COOKAI_DEFAULT_ACCEPT_PORT, ReadHandler AcceptEventHandler = NULL);
 	~Connector(void);
 
-	ChunkedConnection *Connect(char *name, char *service,
+	ChunkedConnection *Connect(char *remote,
 	    ReadHandler streamHander = NULL, ReadHandler blockHandler = NULL,
 	    ReadHandler errorHandler = NULL, size_t chunkSize = 1414);
 	Cookai::ChunkedConnection::Event *NextEvent(void);

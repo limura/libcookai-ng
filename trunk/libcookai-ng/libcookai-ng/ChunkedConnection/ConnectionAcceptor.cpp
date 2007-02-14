@@ -72,11 +72,29 @@ namespace ChunkedConnection {
 	acceptSocketFD = -1;
     }
 
+    bool ConnectionAcceptor::ServiceName2PortNumber(char *serviceName, char *portNumberReturn){
+	if(serviceName == NULL || portNumberReturn == NULL)
+	    return false;
+	if(strncmp("tcpport://", serviceName, 10) == 0){
+	    portNumberReturn[0] = '\0';
+	    strcpy(&portNumberReturn[0], &serviceName[10]);
+	    return true;
+	}
+	return false;
+    }
+
     int ConnectionAcceptor::Connect(char *serviceName){
 	if(acceptSocketFD >= 0)
 	    return acceptSocketFD;
 
-	return acceptSocketFD = listen_stream(serviceName, PF_INET);
+	if(serviceName == NULL)
+	    return -1;
+
+	char buf[1024];
+	if(ServiceName2PortNumber(serviceName, buf) == false)
+	    return -1;
+
+	return acceptSocketFD = listen_stream(buf, PF_INET);
     }
     int ConnectionAcceptor::Connect(void){
 	return Connect(COOKAI_DEFAULT_ACCEPT_PORT);
@@ -93,18 +111,16 @@ namespace ChunkedConnection {
 	    int acceptedSocket = (int)accept(acceptSocketFD, (sockaddr *)&addrs, &addrlen);
 	    if(acceptedSocket >= 0){
 		DPRINTF(10, ("new connection got. FD: %d (accept)\r\n", acceptedSocket));
-		char nameBuf[1024], serviceBuf[64];
-		nameBuf[0] = serviceBuf[0] = '\0';
+		char remoteBuf[1024];
+		remoteBuf[0] = '\0';
 		switch(addrs.ss_family){
 		case AF_INET:
 		    {
 			struct sockaddr_in *sockadd_in = (struct sockaddr_in *)&addrs;
 #ifdef HAVE__SNPRINTF
-			_snprintf(nameBuf, sizeof(nameBuf), "%s", inet_ntoa(sockadd_in->sin_addr));
-			_snprintf(serviceBuf, sizeof(serviceBuf), "%d", htons(sockadd_in->sin_port));
+			_snprintf(remoteBuf, sizeof(remoteBuf), "tcpip://%s/%d", inet_ntoa(sockadd_in->sin_addr), ntohs(sockadd_in->sin_port));
 #else
-			snprintf(nameBuf, sizeof(nameBuf), "%s", inet_ntoa(sockadd_in->sin_addr));
-			snprintf(serviceBuf, sizeof(serviceBuf), "%d", htons(sockadd_in->sin_port));
+			snprintf(remoteBuf, sizeof(remoteBuf), "tcpip://%s/%d", inet_ntoa(sockadd_in->sin_addr), ntohs(sockadd_in->sin_port));
 #endif
 		    }
 		    break;
@@ -119,7 +135,7 @@ namespace ChunkedConnection {
 		    return false;
 		    break;
 		}
-		ChunkedConnection *cc = new Cookai::ChunkedConnection::ChunkedConnection(acceptedSocket, nameBuf, serviceBuf, eventPool);
+		ChunkedConnection *cc = new Cookai::ChunkedConnection::ChunkedConnection(acceptedSocket, remoteBuf, eventPool);
 		if(cc == NULL)
 		    return false;
 		if(connectionManager != NULL){

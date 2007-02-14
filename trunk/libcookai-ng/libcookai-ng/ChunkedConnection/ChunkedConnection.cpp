@@ -31,14 +31,14 @@
 namespace Cookai {
 namespace ChunkedConnection {
 
-    void ChunkedConnection::Initialize(char *Name, char *Service, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize)
+    void ChunkedConnection::Initialize(char *remote, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize)
     {
 	eventPool = Pool;
 	blockReadHandler = NULL;
 	streamReadHandler = NULL;
 	errorHandler = NULL;
 	threadEnable = false;
-	connection = new Cookai::ChunkedConnection::Connection(Name, Service);
+	connection = new Cookai::ChunkedConnection::Connection(remote);
 	chunkSize = ChunkSize;
 	channelWriteQueue.clear();
 	connectionManager = NULL;
@@ -81,15 +81,15 @@ namespace ChunkedConnection {
 	return writeQueue;
     }
 
-    ChunkedConnection::ChunkedConnection(char *Name, char *Service, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
-	Initialize(Name, Service, Pool, ChunkSize);
+    ChunkedConnection::ChunkedConnection(char *remote, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
+	Initialize(remote, Pool, ChunkSize);
     }
-    ChunkedConnection::ChunkedConnection(std::string Name, std::string Service, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
-	Initialize((char *)Name.c_str(), (char *)Service.c_str(), Pool, ChunkSize);
+    ChunkedConnection::ChunkedConnection(std::string remote, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
+	Initialize((char *)remote.c_str(), Pool, ChunkSize);
     }
-    ChunkedConnection::ChunkedConnection(int acceptedFD, char *name, char *service, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
-	Initialize(name, service, Pool, ChunkSize);
-	connection = new Cookai::ChunkedConnection::Connection(acceptedFD, name, service, ChunkSize);
+    ChunkedConnection::ChunkedConnection(int acceptedFD, char *remote, Cookai::ChunkedConnection::EventPool *Pool, size_t ChunkSize){
+	Initialize(remote, Pool, ChunkSize);
+	connection = new Cookai::ChunkedConnection::Connection(acceptedFD, remote, ChunkSize);
     }
 
     ChunkedConnection::~ChunkedConnection(void)
@@ -98,17 +98,6 @@ namespace ChunkedConnection {
 	    thread_cancel(readThreadID);
 	if(connection != NULL)
 	    delete connection;
-    }
-
-    char *ChunkedConnection::GetRemoteName(void){
-	if(connection != NULL)
-	    return connection->GetRemoteName();
-	return NULL;
-    }
-    char *ChunkedConnection::GetRemoteService(void){
-	if(connection != NULL)
-	    return connection->GetRemoteService();
-	return NULL;
     }
 
     void ChunkedConnection::SetBlockReadHandler(ReadHandler handler){

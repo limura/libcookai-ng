@@ -32,7 +32,7 @@
 
 namespace Cookai {
 namespace ChunkedConnection {
-    Connector::Connector(ReadHandler AcceptEventHandler, char *serviceName){
+    Connector::Connector(char *serviceName, ReadHandler AcceptEventHandler){
 	manager = new ConnectionManager();
 	eventPool = new EventPool();
 	Cookai::ChunkedConnection::ConnectionAcceptor *ca = new Cookai::ChunkedConnection::ConnectionAcceptor(eventPool, AcceptEventHandler);
@@ -76,10 +76,10 @@ namespace ChunkedConnection {
 	    eventPool->InvokeAll();
     }
 
-    Cookai::ChunkedConnection::ChunkedConnection *Connector::Connect(char *name, char *service,
+    Cookai::ChunkedConnection::ChunkedConnection *Connector::Connect(char *remote,
 	ReadHandler streamHandler, ReadHandler blockHandler,
 	ReadHandler errorHandler, size_t chunkSize){
-	    Cookai::ChunkedConnection::ChunkedConnection *cc = new Cookai::ChunkedConnection::ChunkedConnection(name, service, eventPool, chunkSize);
+	    Cookai::ChunkedConnection::ChunkedConnection *cc = new Cookai::ChunkedConnection::ChunkedConnection(remote, eventPool, chunkSize);
 	    if(cc == NULL)
 		return NULL;
 

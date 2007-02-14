@@ -103,7 +103,7 @@ bool readHandler(EventType type, StaticBuffer *buf, int channel, ChunkedConnecti
 	    cc->SetStreamReadHandler(readHandler);
 	    cc->SetErrorHandler(readHandler);
 
-#if 1
+#if 0
 	    cc->StreamWrite((unsigned char *)"stream send No 1", 17);
 	    cc->StreamWrite((unsigned char *)"stream No 2", 12);
 	    cc->StreamWrite((unsigned char *)"STREAM No 3 hoge hoge", 22);
@@ -137,14 +137,14 @@ int main(int argc, char *argv[]){
     }
 #endif
 
-    c1 = new Connector(readHandler, "8472");
+    c1 = new Connector("tcpport://8472", readHandler);
     if(c1 == NULL)
-	return -1;
-    c2 = new Connector(readHandler, "8473");
+	return 1;
+    c2 = new Connector("tcpport://8473", readHandler);
     if(c2 == NULL)
-	return -1;
+	return 1;
 
-    ChunkedConnection *cc = c1->Connect("localhost", "8473", readHandler, readHandler, readHandler);
+    ChunkedConnection *cc = c1->Connect("tcpip://localhost/8473", readHandler, readHandler, readHandler);
     
     if(cc != NULL){
 	cc->StreamWrite((unsigned char *)"HogeHoge", 9);
@@ -156,16 +156,14 @@ int main(int argc, char *argv[]){
 	cc->BlockCommit();
     }
 
-    int n = 1;
     for(int i = 0; i < 10; i++){
 	char buf[1024];
 #ifdef HAVE__SNPRINTF
-	_snprintf_s(buf, sizeof(buf), sizeof(buf), "Message No: %d", n);
+	_snprintf_s(buf, sizeof(buf), sizeof(buf), "Message No: %d", i);
 #else
 	snprintf(buf, sizeof(buf), "Message No: %d", n);
 #endif
 	DPRINTF(10, ("write message '%s'\r\n", buf));
-	n++;
 	cc->BlockWrite((unsigned char *)buf, strlen(buf) + 1);
 	cc->BlockCommit();
 	c1->InvokeAllEvent();
@@ -175,7 +173,6 @@ int main(int argc, char *argv[]){
 #else
 	sleep(1);
 #endif
-	//DPRINTF(10, ("sleeping...\r\n"));
     }
     return 0;
 }

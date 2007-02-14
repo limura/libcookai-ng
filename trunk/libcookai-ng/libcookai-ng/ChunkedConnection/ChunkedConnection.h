@@ -62,24 +62,21 @@ namespace ChunkedConnection {
 	ChannelWriteQueue channelWriteQueue;
 	Cookai::ChunkedConnection::EventPool *eventPool;
 
-	void Initialize(char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t ChunkSize = 1414);
+	void Initialize(char *remote, Cookai::ChunkedConnection::EventPool *eventPool, size_t ChunkSize = 1414);
 	StaticBuffer *CreateNewBuffer(void);
 	WriteQueue *GetWriteQueue(int channel);
 	void WriteHeader(int nextChunkNum, int channel, uint16_t length, StaticBuffer *buf);
 	void Run(Connection *targetConnection);
 
     public:
-	ChunkedConnection(char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
-	ChunkedConnection(std::string name, std::string service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
-	ChunkedConnection(int acceptedFD, char *name, char *service, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
+	ChunkedConnection(char *remote, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
+	ChunkedConnection(std::string remote, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
+	ChunkedConnection(int acceptedFD, char *remote, Cookai::ChunkedConnection::EventPool *eventPool, size_t chunkSize = 1414);
 	~ChunkedConnection(void);
 
 	void SetBlockReadHandler(ReadHandler handler);
 	void SetStreamReadHandler(ReadHandler handler);
 	void SetErrorHandler(ReadHandler handler);
-
-	char *GetRemoteName(void);
-	char *GetRemoteService(void);
 
 	bool BlockWrite(unsigned char *buf, size_t length, int channel = 0);
 	bool BlockWrite(char *buf, int channel = 0);
