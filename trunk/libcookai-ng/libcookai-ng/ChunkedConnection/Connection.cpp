@@ -219,7 +219,7 @@ namespace ChunkedConnection {
 
     Cookai::ChunkedConnection::EventType Connection::Run(Event **eventReturn, Cookai::ChunkedConnection::ConnectionStatus status){
 	EventType eventType;
-	DPRINTF(10, ("ChunkedConnection Run(%d)\r\n", status));
+	DPRINTF(10, ("Connection Run(%d) FD:%d\r\n", status, fd));
 	if(status & Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK){
 	    eventType = RunWrite(eventReturn);
 	    if(eventType != Cookai::ChunkedConnection::EVENT_NOTHING)
