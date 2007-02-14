@@ -72,15 +72,14 @@ namespace ChunkedConnection {
 	return true;
     }
 
-    bool Connection::Initialize(char *name, char *service, size_t newChunkSize){
+    bool Connection::Initialize(char *Remote, size_t newChunkSize){
 	fd = -1;
 	nbConnect = NULL;
 	status = STATUS_DISCONNECTED;
 	chunkSize = 500;
 	if(newChunkSize > 500)
 	    chunkSize = newChunkSize;
-	remoteName = NULL;
-	remoteService = NULL;
+	remote = NULL;
 	readBuffer = NULL;
 	readHeaderBuffer = new StaticBuffer(COOKAI_CHUNKEDCONNECTION_HEADERLENGTH);
 	writeBufferList.clear();
@@ -90,39 +89,31 @@ namespace ChunkedConnection {
 	blockChunkLength = 0;
 	nowChunkNum = 0;
 
-	if(name == NULL || service == NULL)
+	if(Remote == NULL)
 	    return false;
-	remoteName = strdup(name);
-	if(remoteName == NULL)
+	remote = strdup(Remote);
+	if(remote == NULL)
 	    return false;
-	remoteService = strdup(service);
-	if(remoteService == NULL){
-	    free(remoteName);
-	    remoteName = NULL;
-	    return false;
-	}
 
 	return true;
     }
 
-    Connection::Connection(char *name, char *service, size_t newChunkSize){
-	Initialize(name, service, newChunkSize);
+    Connection::Connection(char *remote, size_t newChunkSize){
+	Initialize(remote, newChunkSize);
     }
 
-    Connection::Connection(std::string name, std::string service, size_t newChunkSize){
-	Initialize((char *)name.c_str(), (char *)service.c_str(), newChunkSize);
+    Connection::Connection(std::string remote, size_t newChunkSize){
+	Initialize((char *)remote.c_str(), newChunkSize);
     }
-    Connection::Connection(int acceptedFD, char *name, char *service, size_t newChunkSize){
-	Initialize(name, service, newChunkSize);
+    Connection::Connection(int acceptedFD, char *remote, size_t newChunkSize){
+	Initialize(remote, newChunkSize);
 	status = STATUS_CONNECTED;
 	fd = acceptedFD;
     }
 
     Connection::~Connection(void){
-	if(remoteName != NULL)
-	    free(remoteName);
-	if(remoteService != NULL)
-	    free(remoteService);
+	if(remote != NULL)
+	    free(remote);
 	if(readBuffer != NULL)
 	    delete readBuffer;
 	while(!writeBufferList.empty()){
@@ -133,14 +124,6 @@ namespace ChunkedConnection {
 	if(nbConnect != NULL)
 	    delete nbConnect;
 	thread_mutex_destroy(&writeBufferMutex);
-    }
-
-    char *Connection::GetRemoteName(void){
-	return remoteName;
-    }
-
-    char *Connection::GetRemoteService(void){
-	return remoteService;
     }
 
     bool Connection::IsConnect(){
@@ -161,7 +144,7 @@ namespace ChunkedConnection {
     }
 
     bool Connection::Connect(){
-	if(remoteName == NULL || remoteService == NULL)
+	if(remote == NULL)
 	    return false;
 
 	if(fd >= 0 && status == STATUS_CONNECTED)
@@ -171,13 +154,13 @@ namespace ChunkedConnection {
 	    nbConnect = new NonBlockConnect();
 	    if(nbConnect == NULL)
 		return false;
-	    if(nbConnect->SetTarget(remoteName, remoteService) == false){
+	    if(nbConnect->SetTarget(remote) == false){
 		delete nbConnect;
 		nbConnect = NULL;
 		return false;
 	    }
 	}
-	DPRINTF(10, ("connecting to %s:%s (%d)\r\n", remoteName, remoteService, fd));
+	DPRINTF(10, ("connecting to %s (%d)\r\n", remote, fd));
 	switch(nbConnect->Run(&fd)){
 	case NonBlockConnect::CONNECTED:
 	    status = STATUS_CONNECTED;

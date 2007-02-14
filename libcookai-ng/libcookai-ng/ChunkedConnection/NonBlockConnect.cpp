@@ -64,27 +64,44 @@ namespace ChunkedConnection {
 	res = NULL;
 	res0 = NULL;
 	status = NOT_INITIALIZED;
-	remoteName = NULL;
-	remoteService = NULL;
+	remote = NULL;
     }
  
     NonBlockConnect::~NonBlockConnect(void){
 	if(res0 != NULL)
 	    freeaddrinfo(res0);
-	if(remoteName != NULL)
-	    free(remoteName);
-	if(remoteService != NULL)
-	    free(remoteService);
+	if(remote != NULL)
+	    free(remote);
     }
 
-    bool NonBlockConnect::LookupIPPort(char *name, char *service, char *newNameBuf, char *newServiceBuf){
-	if(name == NULL || service == NULL || newNameBuf == NULL || newServiceBuf == NULL)
+    bool NonBlockConnect::LookupIPPort(char *remote, char *newNameBuf, char *newServiceBuf){
+	if(remote == NULL || newNameBuf == NULL || newServiceBuf == NULL)
 	    return false;
 	*newNameBuf = *newServiceBuf = '\0';
 	/* now use DNS or IP addr */
-	strcpy(newNameBuf, name);
-	strcpy(newServiceBuf, service);
-	return true;
+	if(strncmp(remote, "tcpip://", 8) == 0){
+	    char *sp = &remote[8];
+	    char *dp = newNameBuf;
+	    while(*sp != '/' && *sp != '\0'){
+		*dp = *sp;
+		sp++; dp++;
+	    }
+	    *dp = '\0';
+	    while(*sp == '/' && *sp != '\0')
+		sp++;
+	    if(*sp == '\0'){
+		strcpy(newServiceBuf, "1203"); // XXXX magic word 12/03
+		return true;
+	    }
+	    dp = newServiceBuf;
+	    while(*sp != '\0'){
+		*dp = *sp;
+		sp++; dp++;
+	    }
+	    *dp = '\0';
+	    return true;
+	}
+	return false;
     }
 
     bool NonBlockConnect::LookupTarget(void){
@@ -101,9 +118,9 @@ namespace ChunkedConnection {
 	char nameBuf[1024];
 	char serviceBuf[1024];
 
-	LookupIPPort(remoteName, remoteService, nameBuf, serviceBuf);
+	LookupIPPort(remote, nameBuf, serviceBuf);
 
-	DPRINTF(10, ("resolving for connect %s:%s\r\n", remoteName, remoteService));
+	DPRINTF(10, ("resolving for connect %s\r\n", remote));
 
 	if(getaddrinfo(nameBuf, serviceBuf, &hints, &res0)){
 	    status = NOT_INITIALIZED;
@@ -114,15 +131,10 @@ namespace ChunkedConnection {
 	return true;
     }
 
-    bool NonBlockConnect::SetTarget(char *name, char *service){
-	remoteName = strdup(name);
-	if(remoteName == NULL)
+    bool NonBlockConnect::SetTarget(char *Remote){
+	remote = strdup(Remote);
+	if(remote == NULL)
 	    return false;
-	remoteService = strdup(service);
-	if(remoteService == NULL){
-	    free(remoteName);
-	    return false;
-	}
 	return LookupTarget();
     }
 

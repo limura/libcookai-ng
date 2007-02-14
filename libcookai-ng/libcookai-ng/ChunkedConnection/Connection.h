@@ -61,7 +61,7 @@ namespace ChunkedConnection {
 	int fd;
 	NonBlockConnect *nbConnect;
 	size_t chunkSize;
-	char *remoteName, *remoteService;
+	char *remote;
 	StaticBuffer *readBuffer;
 	StaticBuffer *readHeaderBuffer;
 	typedef std::list<StaticBuffer *> WriteBufferList;
@@ -72,16 +72,16 @@ namespace ChunkedConnection {
 	size_t blockChunkLength;
 	int nowChunkNum;
 
-	bool Initialize(char *name, char *service, size_t newChunkSize);
+	bool Initialize(char *remote, size_t newChunkSize);
 	bool Handshake(void);
 	bool Read(void);
 	Cookai::ChunkedConnection::EventType RunRead(Event **eventReturn);
 	Cookai::ChunkedConnection::EventType RunWrite(Event **eventReturn);
 
     public:
-	Connection(char *name, char *service, size_t chunkSize = 1414);
-	Connection(std::string name, std::string service, size_t chunkSize = 1414);
-	Connection(int acceptedFD, char *name, char *service, size_t chunkSize = 1414);
+	Connection(char *remote, size_t chunkSize = 1414);
+	Connection(std::string remote, size_t chunkSize = 1414);
+	Connection(int acceptedFD, char *remote, size_t chunkSize = 1414);
 	~Connection(void);
 
 	bool Connect(void);
@@ -89,9 +89,6 @@ namespace ChunkedConnection {
 	void Disconnect(void);
 	int GetFD(void);
 	bool WriteQueueEmpty(void);
-
-	char *GetRemoteName(void);
-	char *GetRemoteService(void);
 
 	Cookai::ChunkedConnection::EventType Run(Event **eventReturn, Cookai::ChunkedConnection::ConnectionStatus status);
 	bool NonBlockWrite(unsigned char *buf, size_t length);

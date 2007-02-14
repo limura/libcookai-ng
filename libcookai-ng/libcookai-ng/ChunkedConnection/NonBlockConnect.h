@@ -60,9 +60,9 @@ namespace ChunkedConnection {
     private:
 	int fd;
 	struct addrinfo hints, *res, *res0;
-	char *remoteName, *remoteService;
+	char *remote;
 	bool LookupTarget(void);
-	bool LookupIPPort(char *name, char *service, char *nameReturn, char *serviceReturn);
+	bool LookupIPPort(char *remote, char *hostReturn, char *serviceReturn);
     public:
 	typedef enum {
 	    TRYING,
@@ -75,7 +75,7 @@ namespace ChunkedConnection {
 	NonBlockConnect(void);
 	~NonBlockConnect(void);
 
-	bool SetTarget(char *name, char *service);
+	bool SetTarget(char *remote);
 	ConnectionStatus Run(int *fd_return);
     };
 };

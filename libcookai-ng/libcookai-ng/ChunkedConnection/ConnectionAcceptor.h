@@ -44,6 +44,7 @@ namespace ChunkedConnection {
 	ConnectionManager *connectionManager;
 	EventPool *eventPool;
 	ReadHandler acceptEventHandler;
+	bool ServiceName2PortNumber(char *serviceName, char *portNumberReturn);
 
     public:
 	ConnectionAcceptor(EventPool *pool, ReadHandler AcceptEventHandler);
