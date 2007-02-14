@@ -136,10 +136,15 @@ namespace ChunkedConnection {
 	if(fd >= 0){
 	    int ret;
 	    errno = 0;
+	    DPRINTF(10, ("NonBlockConnect::Run() try FD: %d\r\n", fd));
 #ifdef HAVE_WSAGETLASTERROR
 	    WSASetLastError(0);
 #endif
+#ifdef HAVE_WSACONNECT
+	    ret = WSAConnect((SOCKET)fd, res->ai_addr, (int)res->ai_addrlen, NULL, NULL, NULL, NULL); 
+#else
 	    ret = connect(fd, res->ai_addr, (int)res->ai_addrlen);
+#endif
 	    if(ret < 0){
 		if(0
 #ifdef EWOULDBLOCK
@@ -164,6 +169,7 @@ namespace ChunkedConnection {
 		    if(res0 != NULL)
 			freeaddrinfo(res0);
 		    res0 = res = NULL;
+		    DPRINTF(10, ("connected. fd; %d\r\n", fd));
 		    return CONNECTED;
 		}
 #endif
@@ -180,7 +186,7 @@ namespace ChunkedConnection {
 #else
 		int err = errno;
 #endif /* HAVE_WSAGETLASTERROR */
-		DPRINTF(10, ("err: %d\r\n", err));
+		DPRINTF(10, ("NonBlockConnect::Run() err: %d FD:%d\r\n", err, fd));
 #endif /* DEBUG */
 		fd = -1;
 		return Run(fd_return);
@@ -190,6 +196,7 @@ namespace ChunkedConnection {
 	    if(res0 != NULL)
 		freeaddrinfo(res0);
 	    res0 = res = NULL;
+	    DPRINTF(10, ("CONNECT FINISH fd; %d\r\n", fd));
 	    return CONNECTED;
 	}
 
