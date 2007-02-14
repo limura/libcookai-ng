@@ -191,7 +191,7 @@ namespace ChunkedConnection {
 	    while(1){
 		switch(eventType = connection->Run(&ev, status)){
 		    case Cookai::ChunkedConnection::EVENT_NOTHING:
-			return true;
+			goto Run_UpdateStatus;
 			break;
 		    case Cookai::ChunkedConnection::EVENT_RECIVE_BLOCK:
 			if(ev != NULL && blockReadHandler != NULL){
@@ -216,8 +216,9 @@ namespace ChunkedConnection {
 		}
 		if(ev != NULL)
 		    eventPool->AddEvent(ev);
-		break;
+		break; // XXXXX multiple Run() call are break on Win32.
 	    }
+Run_UpdateStatus:
 	    if(connection->WriteQueueEmpty())
 		connectionManager->UpdateSelectStatus(this, connection->GetFD(),
 		Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
