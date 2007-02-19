@@ -153,6 +153,12 @@ namespace ChunkedConnection {
 	return true;
     }
 
+    bool ConnectionAcceptor::HasWriteQueue(void){
+	return false;
+    }
+    bool ConnectionAcceptor::IsConnect(void){
+	return true;
+    }
 };
 };
 

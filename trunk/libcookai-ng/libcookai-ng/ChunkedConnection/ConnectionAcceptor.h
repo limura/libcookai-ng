@@ -54,6 +54,8 @@ namespace ChunkedConnection {
 	int Connect(char *ServiceName);
 	void RegisterConnectionManager(Cookai::ChunkedConnection::ConnectionManager *cm);
 	bool Run(Cookai::ChunkedConnection::ConnectionStatus status);
+	bool HasWriteQueue(void);
+	bool IsConnect(void);
     };
 };
 };

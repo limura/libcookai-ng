@@ -153,6 +153,12 @@ namespace ChunkedConnection {
 
 	if(writeQueue == NULL || connection == NULL)
 	    return false;
+	if(writeQueue->empty())
+	    return true;
+	//if(connection->WriteQueueEmpty())
+	    connectionManager->UpdateSelectStatus(this, connection->GetFD(),
+	    (Cookai::ChunkedConnection::ConnectionStatus)((int)Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK
+	        | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK));
 	int num = (int)writeQueue->size();
 	while(!writeQueue->empty()){
 	    StaticBuffer *buf = writeQueue->front();
@@ -243,6 +249,17 @@ Run_UpdateStatus:
 
 	connection->Connect();
 	return connection->GetFD();
+    }
+
+    bool ChunkedConnection::HasWriteQueue(void){
+	if(connection != NULL)
+	    return !connection->WriteQueueEmpty();
+	return false;
+    }
+    bool ChunkedConnection::IsConnect(void){
+	if(connection != NULL)
+	    return connection->IsConnect();
+	return false;
     }
 };
 }; /* namespace Cookai */

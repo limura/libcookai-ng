@@ -171,7 +171,7 @@ namespace ChunkedConnection {
 		optval = 1;
 		optlen = sizeof(optval);
 		if(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&optval, optlen) != 0){
-		    // nothing to do! we need not TCP_NODELAY.
+		    // nothing to do! we must not need TCP_NODELAY.
 		}
 	    }
 	    return Handshake();
@@ -200,20 +200,33 @@ namespace ChunkedConnection {
 	}
     }
 
-    Cookai::ChunkedConnection::EventType Connection::Run(Event **eventReturn, Cookai::ChunkedConnection::ConnectionStatus status){
+    Cookai::ChunkedConnection::EventType Connection::Run(Event **eventReturn, Cookai::ChunkedConnection::ConnectionStatus connectionStatus){
 	EventType eventType;
-	DPRINTF(10, ("Connection Run(%d) FD:%d\r\n", status, fd));
-	if(status & Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK){
+	DPRINTF(10, ("Connection Run(%d) FD:%d\r\n", connectionStatus, fd));
+	if(connectionStatus & Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK
+	    && status == STATUS_CONNECTED){
 	    eventType = RunWrite(eventReturn);
 	    if(eventType != Cookai::ChunkedConnection::EVENT_NOTHING)
 		return eventType;
 	}
-	if(status & Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK)
+	if(connectionStatus & Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK)
 	    return RunRead(eventReturn);
 	return Cookai::ChunkedConnection::EVENT_NOTHING;
     }
 
     Cookai::ChunkedConnection::EventType Connection::RunWrite(Event **eventReturn){
+	if(eventReturn != NULL)
+	    *eventReturn = NULL;
+	if(fd < 0){
+	    Connect();
+	}else if(status != STATUS_CONNECTED){
+	    Connect();
+	    if(status == STATUS_DISCONNECTED){
+		Disconnect();
+		return Cookai::ChunkedConnection::EVENT_ERROR_SOCKET_CLOSE;
+	    }
+	}
+
 	if(fd < 0 || status != STATUS_CONNECTED)
 	    return Cookai::ChunkedConnection::EVENT_NOTHING;
 

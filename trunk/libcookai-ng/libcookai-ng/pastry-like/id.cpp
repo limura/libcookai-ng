@@ -62,7 +62,7 @@
 #include "id.h"
 
 /*
-xhttp://www.geocities.co.jp/SiliconValley-Oakland/8878/lab18/lab18.html
+http://www.geocities.co.jp/SiliconValley-Oakland/8878/lab18/lab18.html
 http://www.ipa.go.jp/security/rfc/RFC2202JA.html
 sha1: rfc3174.txt
 http://www.ipa.go.jp/security/rfc/RFC3174JA.html

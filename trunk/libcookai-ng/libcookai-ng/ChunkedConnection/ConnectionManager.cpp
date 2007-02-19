@@ -162,6 +162,10 @@ namespace ChunkedConnection {
 	}
 	if(fd < 0)
 	    return;
+	if(!mi->Interface->IsConnect())
+	    status = (Cookai::ChunkedConnection::ConnectionStatus)(status & ~Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK);
+	if(mi->status == status)
+	    return;
 	mi->status = status;
 	if(mi->fd != fd)
 	    AddFDWatcher(fd);
@@ -214,14 +218,24 @@ namespace ChunkedConnection {
     bool ConnectionManager::Run(int usec){
 	if(!initialConnectionList.empty()){
 	    thread_mutex_lock(&initialConnectionListMutex);
-	    while(!initialConnectionList.empty()){
+	    InitialConnectionList::iterator i = initialConnectionList.begin();
+	    while(i != initialConnectionList.end()){
 		ConnectionManagerInterface *Interface = initialConnectionList.front();
 		if(Interface != NULL){
 		    int fd = Interface->Connect();
-		    if(fd >= 0)
-			UpdateSelectStatus(Interface, fd, Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK);
+		    if(fd >= 0){
+			Cookai::ChunkedConnection::ConnectionStatus status = Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK;
+			if(Interface->HasWriteQueue())
+			    status = (Cookai::ChunkedConnection::ConnectionStatus)((int)status | (int)Cookai::ChunkedConnection::CONNECTION_STATUS_WRITE_OK);
+			UpdateSelectStatus(Interface, fd, status);
+			if(Interface->IsConnect())
+			    i = initialConnectionList.erase(i);
+			else
+			    i++;
+			continue;
+		    }
 		}
-		initialConnectionList.pop_front();
+		i++;
 	    }
 	    thread_mutex_unlock(&initialConnectionListMutex);
 	}

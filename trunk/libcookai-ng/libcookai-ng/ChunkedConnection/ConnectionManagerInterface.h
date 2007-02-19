@@ -47,6 +47,8 @@ class ConnectionManager;
 	virtual int Connect(void) = 0;
 	virtual void RegisterConnectionManager(Cookai::ChunkedConnection::ConnectionManager *cm) = 0;
 	virtual bool Run(Cookai::ChunkedConnection::ConnectionStatus status) = 0;
+	virtual bool HasWriteQueue(void) = 0;
+	virtual bool IsConnect(void) = 0;
     };
 };
 };
