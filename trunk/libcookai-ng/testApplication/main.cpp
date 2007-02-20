@@ -161,7 +161,7 @@ int main(int argc, char *argv[]){
 #ifdef HAVE__SNPRINTF
 	_snprintf_s(buf, sizeof(buf), sizeof(buf), "Message No: %d", i);
 #else
-	snprintf(buf, sizeof(buf), "Message No: %d", n);
+	snprintf(buf, sizeof(buf), "Message No: %d", i);
 #endif
 	DPRINTF(10, ("write message '%s'\r\n", buf));
 	cc->BlockWrite((unsigned char *)buf, strlen(buf) + 1);
