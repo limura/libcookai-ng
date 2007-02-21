@@ -25,6 +25,9 @@
  * $Id$
  */
 
+#include "../config.h"
+#include "../tools/tools.h"
+
 #include "ChunkedConnection.h"
 #include "Event.h"
 
@@ -155,6 +158,7 @@ namespace ChunkedConnection {
 	    return false;
 	if(writeQueue->empty())
 	    return true;
+DPRINTF(10, ("BlockCommit\r\n"));
 	//if(connection->WriteQueueEmpty())
 	    connectionManager->UpdateSelectStatus(this, connection->GetFD(),
 	    (Cookai::ChunkedConnection::ConnectionStatus)((int)Cookai::ChunkedConnection::CONNECTION_STATUS_READ_OK
@@ -162,7 +166,8 @@ namespace ChunkedConnection {
 	int num = (int)writeQueue->size();
 	while(!writeQueue->empty()){
 	    StaticBuffer *buf = writeQueue->front();
-	    WriteHeader(num, channel, (uint16_t)buf->GetDataLength(), buf);
+	    WriteHeader(num, channel, (uint16_t)buf->GetDataLength() - COOKAI_CHUNKEDCONNECTION_HEADERLENGTH, buf);
+DPRINTF(10, ("write HeaderLenth: %d\r\n", buf->GetDataLength() - COOKAI_CHUNKEDCONNECTION_HEADERLENGTH));
 	    connection->NonBlockWrite(buf);
 	    writeQueue->pop_front();
 	    num--;
@@ -181,6 +186,7 @@ namespace ChunkedConnection {
     bool ChunkedConnection::StreamWrite(unsigned char *buf, size_t length, int channel){
 	if(buf == NULL || length <= 0 || connection == NULL)
 	    return false;
+DPRINTF(10, ("StreamWrite\r\n"));
 	StaticBuffer *staticBuf = new StaticBuffer(length + COOKAI_CHUNKEDCONNECTION_HEADERLENGTH);
 	if(staticBuf == NULL)
 	    return false;
