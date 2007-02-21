@@ -117,7 +117,9 @@ int StaticBuffer::ReadFromSocket(int fd, size_t *readSize){
 #ifdef HAVE_WSAGETLASTERROR
     WSASetLastError(0);
 #endif
+DPRINTF(10, ("reciving %d bytes from FD: %d\r\n", *readSize, fd));
     int length = recv(fd, (char *)&buf[writePos], (int)*readSize, 0);
+DPRINTF(10, ("recv return %d (%d)\r\n", length, fd));
     if(length < 0){ // error
 	if(0
 #ifdef EWOULDBLOCK
@@ -139,6 +141,9 @@ int StaticBuffer::ReadFromSocket(int fd, size_t *readSize){
 	int err = errno;
 #endif
 	DPRINTF(10, ("err: %d\r\n", err));
+	return -1;
+    }else if(length == 0){
+DPRINTF(10, ("recv(%d) return 0. maybe EOF.\r\n", fd));
 	return -1;
     }else{
 	writePos += length;
@@ -163,13 +168,14 @@ int StaticBuffer::ReadFromSocket(int fd){
 int StaticBuffer::WriteToSocket(int fd){
     if(fd < 0)
 	return -1;
-    if(readPos >= size)
+    if(readPos >= writePos)
 	return 0;
     errno = 0;
 #ifdef HAVE_WSAGETLASTERROR
     WSASetLastError(0);
 #endif
-    int length = send(fd, (char *)&buf[readPos], (int)(size - readPos), 0);
+    int length = send(fd, (char *)&buf[readPos], (int)(writePos - readPos), 0);
+DPRINTF(10, ("send return %d (%d)\r\n", length, fd));
     if(length < 0){
 	if(0
 #ifdef EWOULDBLOCK
@@ -186,8 +192,11 @@ int StaticBuffer::WriteToSocket(int fd){
 	}
 	return -1;
     }
+    if(length == 0){
+	return -1;
+    }
     readPos += length;
-    if(readPos == size)
+    if(readPos == writePos)
 	return 0;
     return length;
 }
