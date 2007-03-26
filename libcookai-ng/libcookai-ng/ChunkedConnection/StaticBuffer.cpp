@@ -142,7 +142,13 @@ DPRINTF(10, ("recv return %d (%d)\r\n", length, fd));
 #endif
 	DPRINTF(10, ("err: %d\r\n", err));
 	return -1;
-    }else if(length == 0){
+    }else if(length == 0
+#ifdef HAVE_WSAGETLASTERROR
+	&& WSAGetLastError() != 0
+#else
+	&& errno != 0
+#endif
+	){
 DPRINTF(10, ("recv(%d) return 0. maybe EOF.\r\n", fd));
 	return -1;
     }else{
@@ -192,7 +198,14 @@ DPRINTF(10, ("send return %d (%d)\r\n", length, fd));
 	}
 	return -1;
     }
-    if(length == 0){
+    if(length == 0
+#ifdef HAVE_WSAGETLASTERROR
+	&& WSAGetLastError() != 0
+#else
+	&& errno != 0
+#endif
+	){
+DPRINTF(10, ("send(%d) return 0. maybe EOF.\r\n", fd));
 	return -1;
     }
     readPos += length;
