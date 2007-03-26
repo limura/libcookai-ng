@@ -186,12 +186,6 @@ namespace ChunkedConnection {
 		    return CONNECTED;
 		}
 #endif
-#ifdef HAVE_CLOSESOCKET
-		closesocket(fd);
-#else
-		close(fd);
-#endif
-		status = FAILED;
 #ifdef DEBUG
 #ifdef HAVE_WSAGETLASTERROR
 		// error list http://homepage1.nifty.com/yito/anhttpd/winsock_error.html
@@ -201,6 +195,12 @@ namespace ChunkedConnection {
 #endif /* HAVE_WSAGETLASTERROR */
 		DPRINTF(10, ("NonBlockConnect::Run() err: %d FD:%d\r\n", err, fd));
 #endif /* DEBUG */
+#ifdef HAVE_CLOSESOCKET
+		closesocket(fd);
+#else
+		close(fd);
+#endif
+		status = FAILED;
 		fd = -1;
 		return Run(fd_return);
 	    }
